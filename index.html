@@ -192,13 +192,13 @@ tailwind.config = {
 <div class="space-y-5">
   <div>
     <label class="block text-sm font-medium text-secondary mb-1.5">MODE 0x128 API Key <span class="text-xs text-muted">(Fast Engine)</span></label>
-    <input type="password" id="key-fast" placeholder="AIza..." class="input-box w-full rounded-xl px-4 py-2.5 text-sm font-mono outline-none transition-all theme-transition" />
-    <p class="text-xs text-muted mt-1.5">Used for: coding, autocomplete, quick answers</p>
+    <input type="password" id="key-fast" placeholder="sk-or-v1-..." class="input-box w-full rounded-xl px-4 py-2.5 text-sm font-mono outline-none transition-all theme-transition" />
+    <p class="text-xs text-muted mt-1.5">OpenRouter key · Model: qwen/qwen3-coder</p>
   </div>
   <div>
     <label class="block text-sm font-medium text-secondary mb-1.5">MODE 0x256 API Key <span class="text-xs text-muted">(Deep Engine)</span></label>
-    <input type="password" id="key-deep" placeholder="AIza..." class="input-box w-full rounded-xl px-4 py-2.5 text-sm font-mono outline-none transition-all theme-transition" />
-    <p class="text-xs text-muted mt-1.5">Used for: architecture, debugging, reasoning</p>
+    <input type="password" id="key-deep" placeholder="sk-or-v1-..." class="input-box w-full rounded-xl px-4 py-2.5 text-sm font-mono outline-none transition-all theme-transition" />
+    <p class="text-xs text-muted mt-1.5">OpenRouter key · Model: mistralai/devstral-small</p>
   </div>
   <div>
     <label class="block text-sm font-medium text-secondary mb-2">Default Mode</label>
@@ -431,7 +431,7 @@ tailwind.config = {
       <div class="flex items-center gap-3">
         <button onclick="clearChat()" class="text-xs text-muted hover:text-secondary transition-colors">Clear</button>
         <span class="text-muted text-xs">·</span>
-        <span id="model-display" class="text-xs text-muted font-mono">gemini-2.0-flash</span>
+        <span id="model-display" class="text-xs text-muted font-mono">qwen/qwen3-coder</span>
       </div>
       <span class="text-xs text-muted" id="char-count">0 chars</span>
     </div>
@@ -466,8 +466,8 @@ const App = {
 };
 
 const MODELS = {
-  fast: 'gemini-2.0-flash',
-  deep: 'gemini-1.5-pro',
+  fast: 'qwen/qwen3-coder',
+  deep: 'mistralai/devstral-small',
 };
 
 const COMMANDS = [
@@ -1053,7 +1053,7 @@ async function sendMessage() {
   updateSuggestions([]);
 
   try {
-    const response = await callGemini(key, conv.messages, text);
+    const response = await callOpenRouter(key, conv.messages, text);
     document.getElementById('thinking-bar').classList.add('hidden');
     await streamResponse(response, conv);
   } catch(err) {
@@ -1084,44 +1084,42 @@ function setThinkingText(mode) {
   }, 1500);
 }
 
-async function callGemini(apiKey, messages, userText) {
+async function callOpenRouter(apiKey, messages, userText) {
   const model = MODELS[App.mode];
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?key=${apiKey}&alt=sse`;
+  const url = 'https://openrouter.ai/api/v1/chat/completions';
 
-  // Build contents array
-  const contents = [];
+  // Build messages array (OpenAI-compatible format)
+  const msgs = [{ role: 'system', content: SYSTEM_PROMPT }];
 
-  // Add history (skip last user msg since we append separately)
-  const histMsgs = messages.slice(0, -1); // exclude the user msg we just added
+  // Add history (skip last user msg — we append it separately)
+  const histMsgs = messages.slice(0, -1);
   histMsgs.forEach(m => {
     if (m.role === 'user') {
-      contents.push({ role: 'user', parts: [{ text: m.content }] });
+      msgs.push({ role: 'user', content: m.content });
     } else if (m.role === 'assistant') {
-      contents.push({ role: 'model', parts: [{ text: m.content }] });
+      msgs.push({ role: 'assistant', content: m.content });
     }
   });
 
   // Add current user message
-  contents.push({ role: 'user', parts: [{ text: userText }] });
+  msgs.push({ role: 'user', content: userText });
 
   const body = {
-    system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-    contents,
-    generationConfig: {
-      temperature: App.mode === 'fast' ? 0.7 : 0.4,
-      maxOutputTokens: App.mode === 'fast' ? 4096 : 8192,
-    },
-    safetySettings: [
-      { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
-      { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
-      { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
-      { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
-    ],
+    model,
+    messages: msgs,
+    temperature: App.mode === 'fast' ? 0.7 : 0.4,
+    max_tokens: App.mode === 'fast' ? 4096 : 8192,
+    stream: true,
   };
 
   const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+      'HTTP-Referer': location.origin,
+      'X-Title': 'Nexus AI',
+    },
     body: JSON.stringify(body),
   });
 
@@ -1179,7 +1177,7 @@ async function streamResponse(response, conv) {
 
         try {
           const json = JSON.parse(data);
-          const text = json.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          const text = json.choices?.[0]?.delta?.content || '';
           if (text) {
             fullText += text;
             contentEl.innerHTML = renderMarkdown(fullText);

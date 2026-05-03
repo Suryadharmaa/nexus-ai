@@ -3,7 +3,7 @@
 <html lang="id" class="h-full">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Nexus AI — Elite Dev Intelligence</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
@@ -44,6 +44,12 @@ html, body { height: 100%; }
   --font-sans: 'Space Grotesk', sans-serif;
   --font-mono: 'Space Mono', monospace;
   --font-serif: 'Instrument Serif', serif;
+  --topbar-h: 56px;
+  --input-area-h: auto;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
 }
 
 body {
@@ -52,7 +58,9 @@ body {
   color: var(--text-primary);
   display: flex;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
+  -webkit-text-size-adjust: 100%;
 }
 
 /* ── SCROLLBAR ── */
@@ -60,6 +68,17 @@ body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 99px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ── OVERLAY (mobile/tablet) ── */
+#sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 30;
+  backdrop-filter: blur(2px);
+}
+#sidebar-overlay.show { display: block; }
 
 /* ── SIDEBAR ── */
 #sidebar {
@@ -72,962 +91,332 @@ body {
   display: flex;
   flex-direction: column;
   position: relative;
-  z-index: 10;
+  z-index: 40;
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  height: 100%;
 }
 
 .sidebar-header {
   padding: 18px 16px 14px;
+  padding-top: calc(18px + var(--safe-top));
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-shrink: 0;
 }
 
-.logo-wrap {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+.logo-wrap { display: flex; align-items: center; gap: 10px; }
 
 .logo-icon {
-  width: 32px;
-  height: 32px;
+  width: 32px; height: 32px;
   background: linear-gradient(135deg, var(--accent), var(--purple));
   border-radius: 9px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   font-size: 16px;
   box-shadow: 0 0 16px var(--accent-glow);
+  flex-shrink: 0;
 }
 
-.logo-text {
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: -0.3px;
-  color: var(--text-primary);
-}
-
-.logo-sub {
-  font-size: 9px;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  letter-spacing: 1px;
-  display: block;
-  line-height: 1;
-  margin-top: 1px;
-}
+.logo-text { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; color: var(--text-primary); }
+.logo-sub { font-size: 9px; color: var(--text-muted); font-family: var(--font-mono); letter-spacing: 1px; display: block; line-height: 1; margin-top: 1px; }
 
 /* ── SIDEBAR SEARCH ── */
-.sidebar-search {
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--border);
-}
-
-.search-wrap {
-  position: relative;
-}
-
-.search-icon {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 13px;
-  height: 13px;
-  opacity: 0.4;
-}
-
+.sidebar-search { padding: 10px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.search-wrap { position: relative; }
+.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 13px; height: 13px; opacity: 0.4; }
 .search-input {
-  width: 100%;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 7px 10px 7px 30px;
-  font-size: 12px;
-  color: var(--text-secondary);
-  outline: none;
-  font-family: var(--font-sans);
-  transition: border-color 0.15s;
+  width: 100%; background: var(--bg-tertiary); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 7px 10px 7px 30px;
+  font-size: 12px; color: var(--text-secondary); outline: none;
+  font-family: var(--font-sans); transition: border-color 0.15s;
 }
 .search-input::placeholder { color: var(--text-muted); }
 .search-input:focus { border-color: var(--accent); }
 
 /* ── PROMPT QUALITY METER ── */
-.quality-meter {
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--border);
-}
-
-.quality-label {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 6px;
-}
-
-.quality-title {
-  font-size: 9px;
-  font-family: var(--font-mono);
-  color: var(--text-muted);
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-}
-
-.quality-status {
-  font-size: 10px;
-  font-weight: 600;
-  font-family: var(--font-mono);
-}
-
-.quality-bar-bg {
-  height: 3px;
-  background: var(--border);
-  border-radius: 99px;
-  overflow: hidden;
-}
-
-#quality-fill {
-  height: 100%;
-  border-radius: 99px;
-  transition: width 0.4s ease, background 0.4s ease;
-  width: 50%;
-  background: var(--accent);
-}
+.quality-meter { padding: 10px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.quality-label { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.quality-title { font-size: 9px; font-family: var(--font-mono); color: var(--text-muted); letter-spacing: 1.2px; text-transform: uppercase; }
+.quality-status { font-size: 10px; font-weight: 600; font-family: var(--font-mono); }
+.quality-bar-bg { height: 3px; background: var(--border); border-radius: 99px; overflow: hidden; }
+#quality-fill { height: 100%; border-radius: 99px; transition: width 0.4s ease, background 0.4s ease; width: 50%; background: var(--accent); }
 
 /* ── CHAT LIST ── */
-.chat-list-wrap {
-  flex: 1;
-  overflow-y: auto;
-  padding: 8px;
-}
-
-.chat-group-label {
-  font-size: 9px;
-  font-family: var(--font-mono);
-  color: var(--text-muted);
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-  padding: 8px 8px 4px;
-}
-
+.chat-list-wrap { flex: 1; overflow-y: auto; padding: 8px; }
+.chat-group-label { font-size: 9px; font-family: var(--font-mono); color: var(--text-muted); letter-spacing: 1.2px; text-transform: uppercase; padding: 8px 8px 4px; }
 .chat-item {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 9px 10px;
-  border-radius: var(--radius-sm);
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  text-align: left;
-  transition: background 0.12s;
-  color: var(--text-secondary);
-  font-family: var(--font-sans);
+  width: 100%; display: flex; align-items: center; gap: 8px;
+  padding: 10px 10px; border-radius: var(--radius-sm); border: none;
+  background: transparent; cursor: pointer; text-align: left;
+  transition: background 0.12s; color: var(--text-secondary); font-family: var(--font-sans);
+  min-height: 44px;
 }
 .chat-item:hover { background: var(--bg-hover); color: var(--text-primary); }
-.chat-item.active {
-  background: var(--accent-glow);
-  border: 1px solid rgba(124,107,255,0.2);
-  color: var(--accent-bright);
-}
+.chat-item.active { background: var(--accent-glow); border: 1px solid rgba(124,107,255,0.2); color: var(--accent-bright); }
 .chat-item-icon { font-size: 12px; opacity: 0.5; flex-shrink: 0; }
 .chat-item-text { font-size: 12px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .chat-item-del {
-  opacity: 0;
-  width: 18px;
-  height: 18px;
-  border: none;
-  background: none;
-  cursor: pointer;
-  color: var(--text-muted);
-  font-size: 14px;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.1s;
-  flex-shrink: 0;
+  opacity: 0; width: 24px; height: 24px; border: none; background: none;
+  cursor: pointer; color: var(--text-muted); font-size: 16px; border-radius: 4px;
+  display: flex; align-items: center; justify-content: center; transition: all 0.1s; flex-shrink: 0;
 }
 .chat-item:hover .chat-item-del { opacity: 1; }
 .chat-item-del:hover { background: rgba(248,113,113,0.15); color: var(--red); }
 
 /* ── SIDEBAR FOOTER ── */
-.sidebar-footer {
-  border-top: 1px solid var(--border);
-  padding: 8px;
-}
-
+.sidebar-footer { border-top: 1px solid var(--border); padding: 8px; flex-shrink: 0; padding-bottom: calc(8px + var(--safe-bottom)); }
 .sidebar-btn {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 10px;
-  border-radius: var(--radius-sm);
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  text-align: left;
-  color: var(--text-muted);
-  font-size: 12px;
-  font-family: var(--font-sans);
-  font-weight: 500;
-  transition: all 0.12s;
+  width: 100%; display: flex; align-items: center; gap: 10px;
+  padding: 10px 10px; border-radius: var(--radius-sm); border: none;
+  background: transparent; cursor: pointer; text-align: left;
+  color: var(--text-muted); font-size: 12px; font-family: var(--font-sans);
+  font-weight: 500; transition: all 0.12s; min-height: 40px;
 }
 .sidebar-btn:hover { background: var(--bg-hover); color: var(--text-secondary); }
 .sidebar-btn svg { flex-shrink: 0; }
-.sidebar-btn kbd {
-  margin-left: auto;
-  font-size: 9px;
-  font-family: var(--font-mono);
-  background: var(--border);
-  padding: 2px 5px;
-  border-radius: 4px;
-  color: var(--text-muted);
-}
+.sidebar-btn kbd { margin-left: auto; font-size: 9px; font-family: var(--font-mono); background: var(--border); padding: 2px 5px; border-radius: 4px; color: var(--text-muted); }
 
 /* ── RESIZE HANDLE ── */
-#sidebar-resize {
-  width: 3px;
-  background: transparent;
-  cursor: col-resize;
-  flex-shrink: 0;
-  transition: background 0.15s;
-}
+#sidebar-resize { width: 3px; background: transparent; cursor: col-resize; flex-shrink: 0; transition: background 0.15s; }
 #sidebar-resize:hover { background: rgba(124,107,255,0.3); }
 
 /* ── MAIN AREA ── */
-#main {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  background: var(--bg-primary);
-}
+#main { flex: 1; min-width: 0; display: flex; flex-direction: column; background: var(--bg-primary); height: 100%; overflow: hidden; }
 
 /* ── TOPBAR ── */
 #topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px; padding-top: var(--safe-top);
+  height: calc(var(--topbar-h) + var(--safe-top));
   border-bottom: 1px solid var(--border);
-  background: rgba(10,10,15,0.8);
-  backdrop-filter: blur(12px);
-  flex-shrink: 0;
-  gap: 12px;
+  background: rgba(10,10,15,0.9); backdrop-filter: blur(12px);
+  flex-shrink: 0; gap: 10px; z-index: 10;
 }
 
-.topbar-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.topbar-left { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
 
 #chat-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 280px;
+  font-size: 13px; font-weight: 600; color: var(--text-primary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
 .topbar-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 
-/* Mode toggle */
-.mode-toggle {
-  display: flex;
-  align-items: center;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 3px;
-  gap: 2px;
-}
+.mode-toggle { display: flex; align-items: center; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 3px; gap: 2px; }
+.mode-btn { padding: 5px 10px; border-radius: 6px; border: none; background: transparent; cursor: pointer; font-size: 11px; font-weight: 600; font-family: var(--font-sans); color: var(--text-muted); transition: all 0.15s; white-space: nowrap; min-height: 30px; }
+.mode-btn.active-fast { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #0a0a0f; }
+.mode-btn.active-deep { background: linear-gradient(135deg, var(--accent), var(--purple)); color: #fff; box-shadow: 0 0 12px var(--accent-glow); }
 
-.mode-btn {
-  padding: 5px 12px;
-  border-radius: 6px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  font-size: 11px;
-  font-weight: 600;
-  font-family: var(--font-sans);
-  color: var(--text-muted);
-  transition: all 0.15s;
-  white-space: nowrap;
-}
-.mode-btn.active-fast {
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
-  color: #0a0a0f;
-}
-.mode-btn.active-deep {
-  background: linear-gradient(135deg, var(--accent), var(--purple));
-  color: #fff;
-  box-shadow: 0 0 12px var(--accent-glow);
-}
-
-.role-badge {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 10px;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-size: 11px;
-  color: var(--text-secondary);
-}
+.role-badge { display: flex; align-items: center; gap: 6px; padding: 5px 10px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 11px; color: var(--text-secondary); white-space: nowrap; }
 
 .icon-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: var(--bg-tertiary);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-muted);
-  transition: all 0.12s;
+  width: 36px; height: 36px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+  background: var(--bg-tertiary); cursor: pointer; display: flex; align-items: center;
+  justify-content: center; color: var(--text-muted); transition: all 0.12s; flex-shrink: 0;
 }
 .icon-btn:hover { border-color: var(--border-bright); color: var(--text-secondary); background: var(--bg-hover); }
 
 /* ── CHAT AREA ── */
-#chat-area {
-  flex: 1;
-  overflow-y: auto;
-  position: relative;
-}
+#chat-area { flex: 1; overflow-y: auto; overflow-x: hidden; position: relative; -webkit-overflow-scrolling: touch; }
 
 /* ── WELCOME ── */
 #welcome {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100%;
-  padding: 40px 24px;
-  text-align: center;
-  animation: fadeIn 0.4s ease;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 100%; padding: 32px 20px; text-align: center; animation: fadeIn 0.4s ease;
 }
 
 .welcome-icon {
-  width: 64px;
-  height: 64px;
-  background: linear-gradient(135deg, var(--accent), var(--purple));
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
-  margin-bottom: 20px;
+  width: 64px; height: 64px; background: linear-gradient(135deg, var(--accent), var(--purple));
+  border-radius: 20px; display: flex; align-items: center; justify-content: center;
+  font-size: 28px; margin-bottom: 20px;
   box-shadow: 0 0 40px var(--accent-glow), 0 0 80px rgba(124,107,255,0.05);
 }
 
-.welcome-title {
-  font-family: var(--font-serif);
-  font-size: 32px;
-  color: var(--text-primary);
-  margin-bottom: 8px;
-  font-style: italic;
-}
+.welcome-title { font-family: var(--font-serif); font-size: 28px; color: var(--text-primary); margin-bottom: 8px; font-style: italic; }
+.welcome-sub { font-size: 13px; color: var(--text-muted); max-width: 360px; line-height: 1.7; margin-bottom: 28px; }
 
-.welcome-sub {
-  font-size: 13px;
-  color: var(--text-muted);
-  max-width: 360px;
-  line-height: 1.7;
-  margin-bottom: 32px;
-}
-
-.template-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  width: 100%;
-  max-width: 480px;
-  margin-bottom: 20px;
-}
-
+.template-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 520px; margin-bottom: 20px; }
 .template-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px;
-  text-align: left;
-  cursor: pointer;
-  transition: all 0.15s;
-  font-family: var(--font-sans);
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 14px; text-align: left; cursor: pointer; transition: all 0.15s; font-family: var(--font-sans);
 }
-.template-card:hover {
-  border-color: rgba(124,107,255,0.3);
-  background: var(--bg-hover);
-  transform: translateY(-1px);
-}
+.template-card:hover { border-color: rgba(124,107,255,0.3); background: var(--bg-hover); transform: translateY(-1px); }
 .template-emoji { font-size: 18px; margin-bottom: 6px; display: block; }
 .template-title { font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 3px; }
 .template-desc { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
-
-.welcome-note {
-  font-size: 11px;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-}
+.welcome-note { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); }
 
 /* ── MESSAGES ── */
-#messages {
-  display: none;
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 24px 20px 8px;
-  width: 100%;
-}
+#messages { display: none; max-width: 820px; margin: 0 auto; padding: 20px 16px 8px; width: 100%; }
 
 .msg-wrap { animation: slideUp 0.25s cubic-bezier(0.16,1,0.3,1); margin-bottom: 20px; }
 
-.user-msg {
-  display: flex;
-  justify-content: flex-end;
-}
-
+.user-msg { display: flex; justify-content: flex-end; }
 .user-bubble {
-  background: var(--user-bubble);
-  border: 1px solid var(--border-bright);
-  border-radius: 16px;
-  border-bottom-right-radius: 4px;
-  padding: 12px 16px;
-  max-width: 75%;
-  font-size: 14px;
-  line-height: 1.65;
-  color: var(--text-primary);
-  white-space: pre-wrap;
-  word-break: break-word;
+  background: var(--user-bubble); border: 1px solid var(--border-bright);
+  border-radius: 16px; border-bottom-right-radius: 4px; padding: 12px 16px;
+  max-width: min(75%, 580px); font-size: 14px; line-height: 1.65;
+  color: var(--text-primary); white-space: pre-wrap; word-break: break-word;
 }
 
-.ai-msg { display: flex; gap: 12px; }
-
+.ai-msg { display: flex; gap: 10px; }
 .ai-avatar {
-  width: 30px;
-  height: 30px;
-  border-radius: 9px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  flex-shrink: 0;
-  margin-top: 2px;
+  width: 30px; height: 30px; border-radius: 9px; display: flex; align-items: center;
+  justify-content: center; font-size: 14px; flex-shrink: 0; margin-top: 2px;
   background: linear-gradient(135deg, var(--accent), var(--purple));
 }
-
 .ai-body { flex: 1; min-width: 0; }
-
-.ai-role-label {
-  font-size: 10px;
-  font-family: var(--font-mono);
-  color: var(--text-muted);
-  margin-bottom: 6px;
-  letter-spacing: 0.5px;
-}
-
-.ai-content {
-  font-size: 14px;
-  line-height: 1.75;
-  color: var(--text-primary);
-}
+.ai-role-label { font-size: 10px; font-family: var(--font-mono); color: var(--text-muted); margin-bottom: 6px; letter-spacing: 0.5px; }
+.ai-content { font-size: 14px; line-height: 1.75; color: var(--text-primary); }
 
 /* Reasoning section */
 .reasoning-block {
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--accent);
-  border-radius: var(--radius-sm);
-  padding: 12px 14px;
-  margin-bottom: 14px;
-  font-size: 12px;
-  color: var(--text-muted);
-  line-height: 1.7;
-  font-family: var(--font-mono);
-}
-
-.reasoning-header {
-  font-size: 10px;
-  color: var(--accent);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  margin-bottom: 6px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  background: var(--bg-tertiary); border: 1px solid var(--border); border-left: 3px solid var(--accent);
+  border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 14px;
+  font-size: 12px; color: var(--text-muted); line-height: 1.7; font-family: var(--font-mono);
 }
 
 /* ── MARKDOWN CONTENT ── */
-.md-content h1, .md-content h2, .md-content h3, .md-content h4 {
-  font-weight: 700;
-  line-height: 1.3;
-  color: var(--text-primary);
-  margin: 1.4em 0 0.5em;
-}
-.md-content h1 { font-size: 1.5em; }
-.md-content h2 { font-size: 1.25em; }
-.md-content h3 { font-size: 1.1em; }
-.md-content h4 { font-size: 1em; }
+.md-content h1, .md-content h2, .md-content h3, .md-content h4 { font-weight: 700; line-height: 1.3; color: var(--text-primary); margin: 1.4em 0 0.5em; }
+.md-content h1 { font-size: 1.4em; } .md-content h2 { font-size: 1.2em; } .md-content h3 { font-size: 1.05em; }
 .md-content p { margin: 0.7em 0; line-height: 1.8; }
-.md-content ul, .md-content ol { margin: 0.6em 0 0.6em 1.6em; }
+.md-content ul, .md-content ol { margin: 0.6em 0 0.6em 1.4em; }
 .md-content li { margin: 0.3em 0; line-height: 1.7; }
 .md-content li::marker { color: var(--accent); }
-.md-content code:not(.hljs) {
-  font-family: var(--font-mono);
-  font-size: 0.82em;
-  background: rgba(124,107,255,0.12);
-  color: var(--accent-bright);
-  padding: 0.15em 0.45em;
-  border-radius: 4px;
-  border: 1px solid rgba(124,107,255,0.2);
-}
+.md-content code:not(.hljs) { font-family: var(--font-mono); font-size: 0.82em; background: rgba(124,107,255,0.12); color: var(--accent-bright); padding: 0.15em 0.45em; border-radius: 4px; border: 1px solid rgba(124,107,255,0.2); word-break: break-all; }
 .md-content pre { margin: 1em 0; }
-.md-content blockquote {
-  border-left: 3px solid var(--accent);
-  padding-left: 14px;
-  margin: 0.8em 0;
-  color: var(--text-secondary);
-  font-style: italic;
-}
-.md-content table { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: 13px; }
-.md-content th, .md-content td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; }
+.md-content blockquote { border-left: 3px solid var(--accent); padding-left: 14px; margin: 0.8em 0; color: var(--text-secondary); font-style: italic; }
+.md-content table { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: 13px; display: block; overflow-x: auto; }
+.md-content th, .md-content td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; white-space: nowrap; }
 .md-content th { background: var(--bg-tertiary); font-weight: 600; color: var(--accent-bright); }
-.md-content a { color: var(--accent-bright); }
+.md-content a { color: var(--accent-bright); word-break: break-all; }
 .md-content strong { font-weight: 700; color: var(--text-primary); }
 .md-content hr { border: none; border-top: 1px solid var(--border); margin: 1.2em 0; }
 
 /* ── CODE BLOCKS ── */
-.code-block-wrap {
-  background: #0d0d14;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  margin: 0.8em 0;
-}
-
-.code-header {
-  background: var(--bg-tertiary);
-  border-bottom: 1px solid var(--border);
-  padding: 8px 14px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.code-lang {
-  font-size: 10px;
-  font-family: var(--font-mono);
-  color: var(--accent-bright);
-  letter-spacing: 0.5px;
-}
-
+.code-block-wrap { background: #0d0d14; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 0.8em 0; max-width: 100%; }
+.code-header { background: var(--bg-tertiary); border-bottom: 1px solid var(--border); padding: 8px 14px; display: flex; align-items: center; justify-content: space-between; }
+.code-lang { font-size: 10px; font-family: var(--font-mono); color: var(--accent-bright); letter-spacing: 0.5px; }
 .code-actions { display: flex; gap: 6px; }
-
-.code-btn {
-  font-size: 10px;
-  font-family: var(--font-mono);
-  color: var(--text-muted);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 3px 8px;
-  border-radius: 4px;
-  transition: all 0.12s;
-}
+.code-btn { font-size: 10px; font-family: var(--font-mono); color: var(--text-muted); background: none; border: none; cursor: pointer; padding: 4px 10px; border-radius: 4px; transition: all 0.12s; min-height: 28px; }
 .code-btn:hover { background: rgba(255,255,255,0.06); color: var(--text-secondary); }
-
-.code-block-wrap pre {
-  margin: 0 !important;
-  padding: 14px !important;
-  background: transparent !important;
-  overflow-x: auto;
-}
-
-.code-block-wrap pre code {
-  font-family: var(--font-mono) !important;
-  font-size: 13px !important;
-  line-height: 1.65 !important;
-}
+.code-block-wrap pre { margin: 0 !important; padding: 14px !important; background: transparent !important; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.code-block-wrap pre code { font-family: var(--font-mono) !important; font-size: 13px !important; line-height: 1.65 !important; }
 
 /* ── MSG ACTIONS ── */
-.msg-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 8px;
-}
-
-.msg-action-btn {
-  font-size: 11px;
-  color: var(--text-muted);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 3px 0;
-  transition: color 0.12s;
-  font-family: var(--font-sans);
-}
+.msg-actions { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+.msg-action-btn { font-size: 11px; color: var(--text-muted); background: none; border: none; cursor: pointer; padding: 4px 0; transition: color 0.12s; font-family: var(--font-sans); min-height: 28px; }
 .msg-action-btn:hover { color: var(--text-secondary); }
 
 /* ── THINKING ── */
-#thinking-bar {
-  display: none;
-  padding: 10px 20px;
-  border-top: 1px solid var(--border);
-}
-
-.thinking-inner {
-  max-width: 800px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-}
-
-.typing-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--accent);
-  display: inline-block;
-  animation: pulseDot 1.4s ease-in-out infinite;
-}
+#thinking-bar { display: none; padding: 10px 20px; border-top: 1px solid var(--border); flex-shrink: 0; }
+.thinking-inner { max-width: 820px; margin: 0 auto; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); font-family: var(--font-mono); }
+.typing-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); display: inline-block; animation: pulseDot 1.4s ease-in-out infinite; }
 .typing-dot:nth-child(2) { animation-delay: 0.2s; }
 .typing-dot:nth-child(3) { animation-delay: 0.4s; }
 
 /* ── INPUT AREA ── */
 #input-area {
   border-top: 1px solid var(--border);
-  background: rgba(10,10,15,0.9);
+  background: rgba(10,10,15,0.95);
   backdrop-filter: blur(12px);
-  padding: 12px 20px 16px;
+  padding: 10px 16px;
+  padding-bottom: calc(10px + var(--safe-bottom));
   flex-shrink: 0;
 }
 
-.input-inner { max-width: 800px; margin: 0 auto; }
+.input-inner { max-width: 820px; margin: 0 auto; }
 
-.suggestion-chips {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-bottom: 10px;
-}
-
-.chip {
-  font-size: 11px;
-  padding: 5px 10px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 99px;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: all 0.12s;
-  font-family: var(--font-sans);
-}
+.suggestion-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.chip { font-size: 11px; padding: 6px 12px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 99px; color: var(--text-muted); cursor: pointer; transition: all 0.12s; font-family: var(--font-sans); white-space: nowrap; min-height: 32px; }
 .chip:hover { border-color: rgba(124,107,255,0.3); color: var(--text-secondary); background: var(--bg-hover); }
 
-.input-row {
-  display: flex;
-  gap: 10px;
-  align-items: flex-end;
-}
-
-.input-wrap { flex: 1; position: relative; }
+.input-row { display: flex; gap: 8px; align-items: flex-end; }
+.input-wrap { flex: 1; position: relative; min-width: 0; }
 
 #chat-input {
-  width: 100%;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 12px 16px;
-  font-size: 14px;
-  color: var(--text-primary);
-  outline: none;
-  font-family: var(--font-sans);
-  resize: none;
-  min-height: 48px;
-  max-height: 200px;
-  line-height: 1.55;
-  transition: border-color 0.15s, box-shadow 0.15s;
-  overflow-y: auto;
+  width: 100%; background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 12px 14px; font-size: 15px;
+  color: var(--text-primary); outline: none; font-family: var(--font-sans);
+  resize: none; min-height: 48px; max-height: 180px; line-height: 1.55;
+  transition: border-color 0.15s, box-shadow 0.15s; overflow-y: auto;
+  -webkit-appearance: none; -webkit-overflow-scrolling: touch;
 }
 #chat-input::placeholder { color: var(--text-muted); }
-#chat-input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-glow);
+#chat-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+
+.input-action-btns { display: flex; gap: 6px; align-items: flex-end; flex-shrink: 0; }
+
+#search-toggle-btn {
+  width: 48px; height: 48px; border-radius: var(--radius); border: 1px solid var(--border);
+  background: var(--bg-card); cursor: pointer; display: flex; align-items: center;
+  justify-content: center; flex-shrink: 0; transition: all 0.15s; color: var(--text-muted); font-size: 17px;
 }
+#search-toggle-btn.active { border-color: var(--green); background: var(--green-dim); }
 
 #send-btn {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius);
+  width: 48px; height: 48px; border-radius: var(--radius);
   background: linear-gradient(135deg, var(--accent), var(--purple));
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: all 0.15s;
-  box-shadow: 0 0 16px var(--accent-glow);
+  border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all 0.15s; box-shadow: 0 0 16px var(--accent-glow);
 }
 #send-btn:hover { transform: scale(1.05); box-shadow: 0 0 24px rgba(124,107,255,0.3); }
 #send-btn:disabled { opacity: 0.4; transform: none; cursor: not-allowed; }
+#send-btn:active { transform: scale(0.96); }
 
-.input-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 8px;
-  padding: 0 2px;
-}
-
-.input-footer-left { display: flex; align-items: center; gap: 12px; }
-
-.footer-btn {
-  font-size: 11px;
-  color: var(--text-muted);
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-family: var(--font-sans);
-  transition: color 0.12s;
-}
+.input-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; padding: 0 2px; }
+.input-footer-left { display: flex; align-items: center; gap: 10px; }
+.footer-btn { font-size: 11px; color: var(--text-muted); background: none; border: none; cursor: pointer; font-family: var(--font-sans); transition: color 0.12s; min-height: 28px; padding: 4px 0; }
 .footer-btn:hover { color: var(--text-secondary); }
-
-.model-tag {
-  font-size: 10px;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-}
-
-.char-tag {
-  font-size: 10px;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-}
+.model-tag { font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); }
+.char-tag { font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); }
 
 /* ── WEB SEARCH INDICATOR ── */
-.search-indicator {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 10px;
-  font-family: var(--font-mono);
-  color: var(--green);
-  background: var(--green-dim);
-  border: 1px solid rgba(34,211,165,0.2);
-  border-radius: 99px;
-  padding: 3px 8px;
-  margin-bottom: 8px;
-}
+.search-indicator { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-family: var(--font-mono); color: var(--green); background: var(--green-dim); border: 1px solid rgba(34,211,165,0.2); border-radius: 99px; padding: 3px 8px; margin-bottom: 8px; }
 
 /* ── SETTINGS MODAL ── */
-.modal-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(6px);
-  z-index: 50;
-  align-items: center;
-  justify-content: center;
-}
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(6px); z-index: 100; align-items: center; justify-content: center; padding: 16px; }
 .modal-overlay.show { display: flex; }
-
-.modal-box {
-  background: var(--bg-card);
-  border: 1px solid var(--border-bright);
-  border-radius: 18px;
-  padding: 28px;
-  width: 100%;
-  max-width: 440px;
-  margin: 16px;
-  animation: slideUp 0.25s ease;
-  box-shadow: 0 0 60px rgba(0,0,0,0.5), 0 0 100px rgba(124,107,255,0.05);
-}
-
-.modal-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.modal-close {
-  width: 28px;
-  height: 28px;
-  border: none;
-  background: var(--bg-hover);
-  border-radius: 6px;
-  cursor: pointer;
-  color: var(--text-muted);
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.12s;
-}
+.modal-box { background: var(--bg-card); border: 1px solid var(--border-bright); border-radius: 18px; padding: 24px; width: 100%; max-width: 440px; animation: slideUp 0.25s ease; box-shadow: 0 0 60px rgba(0,0,0,0.5); overflow-y: auto; max-height: 90vh; }
+.modal-title { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; }
+.modal-close { width: 32px; height: 32px; border: none; background: var(--bg-hover); border-radius: 6px; cursor: pointer; color: var(--text-muted); font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.12s; }
 .modal-close:hover { color: var(--text-primary); }
-
 .field-group { margin-bottom: 16px; }
 .field-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; display: block; }
-.field-hint { font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); margin-top: 4px; }
-
-.field-input {
-  width: 100%;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 10px 12px;
-  font-size: 13px;
-  color: var(--text-primary);
-  outline: none;
-  font-family: var(--font-mono);
-  transition: border-color 0.15s;
-}
+.field-hint { font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); margin-top: 4px; line-height: 1.5; }
+.field-input { width: 100%; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; font-size: 13px; color: var(--text-primary); outline: none; font-family: var(--font-mono); transition: border-color 0.15s; -webkit-appearance: none; }
 .field-input::placeholder { color: var(--text-muted); }
 .field-input:focus { border-color: var(--accent); }
-
-.mode-select {
-  display: flex;
-  gap: 8px;
-}
-.mode-select-btn {
-  flex: 1;
-  padding: 10px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: var(--bg-tertiary);
-  color: var(--text-muted);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: var(--font-sans);
-  transition: all 0.15s;
-}
+.mode-select { display: flex; gap: 8px; }
+.mode-select-btn { flex: 1; padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg-tertiary); color: var(--text-muted); font-size: 12px; font-weight: 600; cursor: pointer; font-family: var(--font-sans); transition: all 0.15s; min-height: 44px; }
 .mode-select-btn.sel-fast { border-color: #f59e0b; background: rgba(251,191,36,0.08); color: #fbbf24; }
 .mode-select-btn.sel-deep { border-color: var(--accent); background: var(--accent-glow); color: var(--accent-bright); }
-
 .danger-zone { border-top: 1px solid var(--border); padding-top: 14px; margin-top: 14px; }
-.danger-btn {
-  font-size: 12px;
-  color: var(--red);
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-family: var(--font-sans);
-  padding: 0;
-  transition: opacity 0.12s;
-}
+.danger-btn { font-size: 12px; color: var(--red); background: none; border: none; cursor: pointer; font-family: var(--font-sans); padding: 4px 0; transition: opacity 0.12s; min-height: 32px; }
 .danger-btn:hover { opacity: 0.7; }
-
 .modal-actions { display: flex; gap: 8px; margin-top: 20px; }
-.primary-btn {
-  flex: 1;
-  padding: 11px;
-  background: linear-gradient(135deg, var(--accent), var(--purple));
-  border: none;
-  border-radius: var(--radius-sm);
-  color: #fff;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: var(--font-sans);
-  transition: all 0.15s;
-}
+.primary-btn { flex: 1; padding: 12px; background: linear-gradient(135deg, var(--accent), var(--purple)); border: none; border-radius: var(--radius-sm); color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; font-family: var(--font-sans); transition: all 0.15s; min-height: 44px; }
 .primary-btn:hover { transform: scale(1.02); }
 
 /* ── COMMAND PALETTE ── */
-#cmd-palette {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  backdrop-filter: blur(8px);
-  z-index: 50;
-  align-items: flex-start;
-  justify-content: center;
-  padding-top: 18vh;
-}
+#cmd-palette { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); z-index: 100; align-items: flex-start; justify-content: center; padding: 16px; padding-top: max(60px, 14vh); }
 #cmd-palette.show { display: flex; }
-
-.cmd-box {
-  background: var(--bg-card);
-  border: 1px solid var(--border-bright);
-  border-radius: 14px;
-  width: 100%;
-  max-width: 520px;
-  margin: 0 16px;
-  overflow: hidden;
-  animation: slideUp 0.2s ease;
-  box-shadow: 0 0 60px rgba(0,0,0,0.4);
-}
-
-.cmd-search {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--border);
-}
-
-#cmd-input {
-  flex: 1;
-  background: none;
-  border: none;
-  outline: none;
-  font-size: 14px;
-  color: var(--text-primary);
-  font-family: var(--font-sans);
-}
+.cmd-box { background: var(--bg-card); border: 1px solid var(--border-bright); border-radius: 14px; width: 100%; max-width: 520px; overflow: hidden; animation: slideUp 0.2s ease; box-shadow: 0 0 60px rgba(0,0,0,0.4); }
+.cmd-search { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+#cmd-input { flex: 1; background: none; border: none; outline: none; font-size: 15px; color: var(--text-primary); font-family: var(--font-sans); min-height: 24px; }
 #cmd-input::placeholder { color: var(--text-muted); }
-
-.cmd-list { max-height: 300px; overflow-y: auto; padding: 6px; }
-
-.cmd-item {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  border-radius: var(--radius-sm);
-  text-align: left;
-  font-family: var(--font-sans);
-  transition: background 0.1s;
-}
+.cmd-list { max-height: 55vh; overflow-y: auto; padding: 6px; -webkit-overflow-scrolling: touch; }
+.cmd-item { width: 100%; display: flex; align-items: center; gap: 10px; padding: 12px 12px; border: none; background: transparent; cursor: pointer; border-radius: var(--radius-sm); text-align: left; font-family: var(--font-sans); transition: background 0.1s; min-height: 44px; }
 .cmd-item:hover { background: var(--bg-hover); }
 .cmd-item-icon { font-size: 15px; width: 22px; text-align: center; }
 .cmd-item-label { font-size: 13px; color: var(--text-primary); }
 
 /* ── TOAST ── */
 .toast {
-  position: fixed;
-  bottom: 100px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 100;
-  padding: 10px 18px;
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 500;
-  animation: slideUp 0.2s ease;
-  pointer-events: none;
+  position: fixed; bottom: calc(90px + var(--safe-bottom)); left: 50%; transform: translateX(-50%);
+  z-index: 200; padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 500;
+  animation: slideUp 0.2s ease; pointer-events: none; white-space: nowrap;
 }
 .toast-success { background: var(--bg-card); border: 1px solid var(--border-bright); color: var(--text-primary); }
 .toast-error { background: rgba(248,113,113,0.15); border: 1px solid rgba(248,113,113,0.3); color: var(--red); }
@@ -1037,45 +426,78 @@ body {
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes pulseDot { 0%,80%,100% { transform: scale(0.6); opacity: 0.3; } 40% { transform: scale(1); opacity: 1; } }
-@keyframes spin { to { transform: rotate(360deg); } }
 
-/* ── MOBILE ── */
-@media (max-width: 768px) {
-  #sidebar {
-    position: fixed;
-    top: 0; left: 0; bottom: 0;
-    z-index: 40;
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-  }
-  #sidebar.open { transform: translateX(0); }
+/* ═══════════════════════════════════════
+   RESPONSIVE — TABLET (768px – 1024px)
+═══════════════════════════════════════ */
+@media (min-width: 769px) and (max-width: 1024px) {
+  :root { --sidebar-w: 240px; }
+  #sidebar { position: fixed; top: 0; left: 0; bottom: 0; height: 100%; transform: translateX(-100%); z-index: 40; }
+  #sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.4); }
+  #sidebar-overlay.show { display: block; }
   #sidebar-resize { display: none; }
-  .topbar-right .role-badge { display: none; }
+  #main { width: 100%; }
+  #mobile-menu-btn { display: flex !important; }
+  .role-badge { display: none; }
+  #messages { max-width: 100%; padding: 20px 20px 8px; }
+  .input-inner { max-width: 100%; }
+  .thinking-inner { max-width: 100%; }
+  #chat-input { font-size: 16px; } /* Prevents iOS zoom */
+  .welcome-title { font-size: 26px; }
+  .template-grid { max-width: 100%; grid-template-columns: repeat(3, 1fr); }
 }
 
-/* Light mode */
+/* ═══════════════════════════════════════
+   RESPONSIVE — MOBILE (< 768px)
+═══════════════════════════════════════ */
+@media (max-width: 768px) {
+  :root { --sidebar-w: 80vw; }
+  #sidebar { position: fixed; top: 0; left: 0; bottom: 0; height: 100%; transform: translateX(-100%); z-index: 40; max-width: 300px; }
+  #sidebar.open { transform: translateX(0); box-shadow: 4px 0 30px rgba(0,0,0,0.5); }
+  #sidebar-resize { display: none; }
+  #main { width: 100%; }
+  #mobile-menu-btn { display: flex !important; }
+  .role-badge { display: none; }
+  .mode-btn { padding: 5px 8px; font-size: 10px; }
+  #messages { padding: 16px 12px 8px; }
+  .user-bubble { max-width: 88%; font-size: 14px; }
+  .ai-content { font-size: 14px; }
+  #chat-input { font-size: 16px; padding: 10px 12px; } /* Prevents iOS zoom on focus */
+  .template-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .welcome-title { font-size: 24px; }
+  .welcome-sub { font-size: 12px; }
+  .welcome-icon { width: 52px; height: 52px; font-size: 22px; }
+  .input-inner { padding: 0; }
+  #send-btn, #search-toggle-btn { width: 44px; height: 44px; }
+  .suggestion-chips { gap: 5px; }
+  .chip { font-size: 11px; padding: 5px 10px; }
+  .code-block-wrap pre code { font-size: 12px !important; }
+  #topbar { padding: 0 12px; padding-top: var(--safe-top); }
+  #input-area { padding: 10px 12px; padding-bottom: calc(8px + var(--safe-bottom)); }
+}
+
+/* ═══════════════════════════════════════
+   RESPONSIVE — LARGE (> 1200px)
+═══════════════════════════════════════ */
+@media (min-width: 1200px) {
+  :root { --sidebar-w: 280px; }
+  #messages { max-width: 860px; }
+  .template-grid { max-width: 560px; grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ── LIGHT MODE ── */
 .light {
-  --bg-primary: #f8f8fc;
-  --bg-secondary: #f0f0f8;
-  --bg-tertiary: #e8e8f2;
-  --bg-card: #ffffff;
-  --bg-hover: #ebebf5;
-  --border: #e0e0ee;
-  --border-bright: #d0d0e8;
-  --text-primary: #1a1a2e;
-  --text-secondary: #44445a;
-  --text-muted: #88889a;
-  --user-bubble: #ebebf8;
-  --accent-glow: rgba(124,107,255,0.1);
+  --bg-primary: #f8f8fc; --bg-secondary: #f0f0f8; --bg-tertiary: #e8e8f2;
+  --bg-card: #ffffff; --bg-hover: #ebebf5; --border: #e0e0ee; --border-bright: #d0d0e8;
+  --text-primary: #1a1a2e; --text-secondary: #44445a; --text-muted: #88889a;
+  --user-bubble: #ebebf8; --accent-glow: rgba(124,107,255,0.1);
 }
-
-.light #hljs-theme-link { display: none; }
 </style>
 
 </head>
 <body>
 
-<!-- ═══════════════════════ SETTINGS MODAL ═══════════════════════ -->
+<!-- SETTINGS MODAL -->
 
 <div id="settings-modal" class="modal-overlay" onclick="overlayClose(event,'settings-modal')">
   <div class="modal-box" onclick="event.stopPropagation()">
@@ -1083,41 +505,33 @@ body {
       ⚙️ Konfigurasi API
       <button class="modal-close" onclick="closeSettings()">×</button>
     </div>
-
-```
-<div class="field-group">
-  <label class="field-label">MODE ⚡ Fast — API Key <span style="color:var(--text-muted);font-weight:400">(OpenRouter)</span></label>
-  <input type="password" id="key-fast" class="field-input" placeholder="sk-or-v1-..." />
-  <div class="field-hint">Model: qwen/qwen3-coder · Cepat & efisien · Web search otomatis terintegrasi</div>
-</div>
-
-<div class="field-group">
-  <label class="field-label">MODE 🧠 Deep — API Key <span style="color:var(--text-muted);font-weight:400">(OpenRouter)</span></label>
-  <input type="password" id="key-deep" class="field-input" placeholder="sk-or-v1-..." />
-  <div class="field-hint">Model: mistralai/devstral-small · Deep reasoning · Web search otomatis terintegrasi</div>
-</div>
-
-<div class="field-group">
-  <label class="field-label">Default Mode</label>
-  <div class="mode-select">
-    <button id="sel-fast-btn" class="mode-select-btn" onclick="setDefaultMode('fast')">⚡ Fast</button>
-    <button id="sel-deep-btn" class="mode-select-btn" onclick="setDefaultMode('deep')">🧠 Deep</button>
+    <div class="field-group">
+      <label class="field-label">MODE ⚡ Fast — API Key <span style="color:var(--text-muted);font-weight:400">(OpenRouter)</span></label>
+      <input type="password" id="key-fast" class="field-input" placeholder="sk-or-v1-..." autocomplete="off" />
+      <div class="field-hint">Model: qwen/qwen3-coder · Cepat & efisien</div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">MODE 🧠 Deep — API Key <span style="color:var(--text-muted);font-weight:400">(OpenRouter)</span></label>
+      <input type="password" id="key-deep" class="field-input" placeholder="sk-or-v1-..." autocomplete="off" />
+      <div class="field-hint">Model: mistralai/devstral-small · Deep reasoning</div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Default Mode</label>
+      <div class="mode-select">
+        <button id="sel-fast-btn" class="mode-select-btn" onclick="setDefaultMode('fast')">⚡ Fast</button>
+        <button id="sel-deep-btn" class="mode-select-btn" onclick="setDefaultMode('deep')">🧠 Deep</button>
+      </div>
+    </div>
+    <div class="danger-zone">
+      <button class="danger-btn" onclick="clearAllData()">🗑 Hapus semua percakapan & reset</button>
+    </div>
+    <div class="modal-actions">
+      <button class="primary-btn" onclick="saveSettings()">💾 Simpan Konfigurasi</button>
+    </div>
   </div>
 </div>
 
-<div class="danger-zone">
-  <button class="danger-btn" onclick="clearAllData()">🗑 Hapus semua percakapan & reset</button>
-</div>
-
-<div class="modal-actions">
-  <button class="primary-btn" onclick="saveSettings()">💾 Simpan Konfigurasi</button>
-</div>
-```
-
-  </div>
-</div>
-
-<!-- ═══════════════════════ COMMAND PALETTE ═══════════════════════ -->
+<!-- COMMAND PALETTE -->
 
 <div id="cmd-palette" onclick="overlayClose(event,'cmd-palette')">
   <div class="cmd-box" onclick="event.stopPropagation()">
@@ -1130,10 +544,13 @@ body {
   </div>
 </div>
 
-<!-- ═══════════════════════ APP LAYOUT ═══════════════════════ -->
+<!-- SIDEBAR OVERLAY -->
+
+<div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<!-- APP LAYOUT -->
 
 <aside id="sidebar">
-  <!-- Header -->
   <div class="sidebar-header">
     <div class="logo-wrap">
       <div class="logo-icon">⚡</div>
@@ -1146,34 +563,20 @@ body {
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
     </button>
   </div>
-
-  <!-- Quality Meter -->
-
   <div class="quality-meter">
     <div class="quality-label">
       <span class="quality-title">KUALITAS PROMPT</span>
       <span class="quality-status" id="quality-status" style="color:var(--accent)">Menunggu...</span>
     </div>
-    <div class="quality-bar-bg">
-      <div id="quality-fill"></div>
-    </div>
+    <div class="quality-bar-bg"><div id="quality-fill"></div></div>
   </div>
-
-  <!-- Search -->
-
   <div class="sidebar-search">
     <div class="search-wrap">
       <svg class="search-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       <input class="search-input" placeholder="Cari percakapan..." oninput="filterChats(this.value)" />
     </div>
   </div>
-
-  <!-- Chat List -->
-
   <div class="chat-list-wrap" id="chat-list"></div>
-
-  <!-- Footer -->
-
   <div class="sidebar-footer">
     <button class="sidebar-btn" onclick="openSettings()">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -1193,16 +596,13 @@ body {
 
 <div id="sidebar-resize" onmousedown="startResize(event)"></div>
 
-<!-- ═══════════════════════ MAIN ═══════════════════════ -->
+<!-- MAIN -->
 
 <div id="main">
-
-  <!-- Topbar -->
-
   <div id="topbar">
     <div class="topbar-left">
       <button class="icon-btn" style="display:none" id="mobile-menu-btn" onclick="toggleSidebar()">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
       <span id="chat-title">Percakapan baru</span>
     </div>
@@ -1221,89 +621,44 @@ body {
     </div>
   </div>
 
-  <!-- Chat Area -->
-
   <div id="chat-area">
-
-```
-<!-- Welcome -->
-<div id="welcome">
-  <div class="welcome-icon">⚡</div>
-  <h1 class="welcome-title">Nexus AI</h1>
-  <p class="welcome-sub">Elite development intelligence. Deep reasoning, full-stack expertise, web research — semua dalam satu platform.</p>
-
-  <div class="template-grid">
-    <button class="template-card" onclick="useTemplate('debug')">
-      <span class="template-emoji">🐛</span>
-      <div class="template-title">Debug & Fix</div>
-      <div class="template-desc">Analisis mendalam bug dan perbaikan sistematis</div>
-    </button>
-    <button class="template-card" onclick="useTemplate('build')">
-      <span class="template-emoji">🏗️</span>
-      <div class="template-title">Build Feature</div>
-      <div class="template-desc">Rancang dan bangun fitur dari nol hingga selesai</div>
-    </button>
-    <button class="template-card" onclick="useTemplate('review')">
-      <span class="template-emoji">🔍</span>
-      <div class="template-title">Code Review</div>
-      <div class="template-desc">Review mendalam: kualitas, keamanan, performa</div>
-    </button>
-    <button class="template-card" onclick="useTemplate('architect')">
-      <span class="template-emoji">🏛️</span>
-      <div class="template-title">Architecture</div>
-      <div class="template-desc">Desain sistem skala besar yang robust</div>
-    </button>
-    <button class="template-card" onclick="useTemplate('security')">
-      <span class="template-emoji">🔐</span>
-      <div class="template-title">Security Audit</div>
-      <div class="template-desc">Temukan celah keamanan dan hardening</div>
-    </button>
-    <button class="template-card" onclick="useTemplate('optimize')">
-      <span class="template-emoji">⚡</span>
-      <div class="template-title">Optimize</div>
-      <div class="template-desc">Profiling dan optimasi performa kritis</div>
-    </button>
+    <div id="welcome">
+      <div class="welcome-icon">⚡</div>
+      <h1 class="welcome-title">Nexus AI</h1>
+      <p class="welcome-sub">Elite development intelligence. Deep reasoning, full-stack expertise, web research — semua dalam satu platform.</p>
+      <div class="template-grid">
+        <button class="template-card" onclick="useTemplate('debug')"><span class="template-emoji">🐛</span><div class="template-title">Debug & Fix</div><div class="template-desc">Analisis mendalam bug dan perbaikan sistematis</div></button>
+        <button class="template-card" onclick="useTemplate('build')"><span class="template-emoji">🏗️</span><div class="template-title">Build Feature</div><div class="template-desc">Rancang dan bangun fitur dari nol hingga selesai</div></button>
+        <button class="template-card" onclick="useTemplate('review')"><span class="template-emoji">🔍</span><div class="template-title">Code Review</div><div class="template-desc">Review mendalam: kualitas, keamanan, performa</div></button>
+        <button class="template-card" onclick="useTemplate('architect')"><span class="template-emoji">🏛️</span><div class="template-title">Architecture</div><div class="template-desc">Desain sistem skala besar yang robust</div></button>
+        <button class="template-card" onclick="useTemplate('security')"><span class="template-emoji">🔐</span><div class="template-title">Security Audit</div><div class="template-desc">Temukan celah keamanan dan hardening</div></button>
+        <button class="template-card" onclick="useTemplate('optimize')"><span class="template-emoji">⚡</span><div class="template-title">Optimize</div><div class="template-desc">Profiling dan optimasi performa kritis</div></button>
+      </div>
+      <p class="welcome-note">Konfigurasi API key di Settings untuk memulai → ⌘K untuk command palette</p>
+    </div>
+    <div id="messages"></div>
   </div>
-
-  <p class="welcome-note">Konfigurasi API key di Settings untuk memulai → ⌘K untuk command palette</p>
-</div>
-
-<!-- Messages -->
-<div id="messages"></div>
-```
-
-  </div>
-
-  <!-- Thinking Bar -->
 
   <div id="thinking-bar">
     <div class="thinking-inner">
-      <span class="typing-dot"></span>
-      <span class="typing-dot"></span>
-      <span class="typing-dot"></span>
+      <span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>
       <span id="thinking-text" style="font-size:11px">Nexus sedang berpikir...</span>
     </div>
   </div>
-
-  <!-- Input Area -->
 
   <div id="input-area">
     <div class="input-inner">
       <div class="suggestion-chips" id="suggestion-chips"></div>
       <div class="input-row">
         <div class="input-wrap">
-          <textarea
-            id="chat-input"
-            rows="1"
-            placeholder="Tanya apapun... (Shift+Enter untuk baris baru, Enter untuk kirim)"
-            onkeydown="handleKey(event)"
-            oninput="handleInput(this)"
-          ></textarea>
+          <textarea id="chat-input" rows="1" placeholder="Tanya apapun... (Shift+Enter baris baru)" onkeydown="handleKey(event)" oninput="handleInput(this)"></textarea>
         </div>
-        <button id="search-toggle-btn" onclick="toggleWebSearch()" title="Toggle Web Search" style="width:48px;height:48px;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg-card);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s;color:var(--text-muted);font-size:17px;" >🔍</button>
-        <button id="send-btn" onclick="sendMessage()">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </button>
+        <div class="input-action-btns">
+          <button id="search-toggle-btn" onclick="toggleWebSearch()" title="Toggle Web Search">🔍</button>
+          <button id="send-btn" onclick="sendMessage()">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
       </div>
       <div class="input-footer">
         <div class="input-footer-left">
@@ -1315,7 +670,6 @@ body {
       </div>
     </div>
   </div>
-
 </div>
 
 <script>
@@ -1329,407 +683,72 @@ const App = {
   conversations: [],
   currentId: null,
   streaming: false,
-  webSearch: false,          // integrated web search toggle (works in both Fast & Deep)
+  webSearch: false,
   keys: { fast: '', deep: '' },
   currentRole: 'engineer',
 };
 
+// ── FIX #1: Only 2 modes, no 'search' mode to prevent Type error ──
 const MODELS = {
-  fast:   'qwen/qwen3-coder',
-  deep:   'mistralai/devstral-small',
+  fast: 'qwen/qwen3-coder',
+  deep: 'mistralai/devstral-small',
 };
 
 const MODEL_LABELS = {
-  fast:   'qwen/qwen3-coder',
-  deep:   'mistralai/devstral-small',
+  fast: 'qwen/qwen3-coder',
+  deep: 'mistralai/devstral-small',
 };
 
-// ═══════════════════════════════════════════════════════════════
-// SYSTEM PROMPT — ELITE ENGINEER AI
-// This is the core brain of Nexus AI
-// ═══════════════════════════════════════════════════════════════
 const SYSTEM_PROMPT = `# NEXUS AI — ELITE SOFTWARE ENGINEERING INTELLIGENCE SYSTEM
 
 You are **Nexus**, a superintelligent senior software engineer with 20+ years of deep technical expertise across the entire software stack. You operate at the level of a Distinguished Engineer at a top-tier tech company (Google, Meta, Apple, Stripe).
 
----
+## 🧠 EXPERTISE
+Expert across: HTML5/CSS3, JavaScript/TypeScript, Python, Rust, C/C++, PHP, SQL, Bash, React, Next.js, Vue, Node.js, FastAPI, Laravel, PostgreSQL, Redis, Docker, Kubernetes, AWS/GCP/Azure.
 
-## 🧠 IDENTITY & EXPERTISE MATRIX
+## 🎯 CORE PRINCIPLES
+1. **Deep thinking before executing** — analyze intent, context, approach tradeoffs, risks
+2. **Code completeness** — NEVER produce placeholders like // TODO, always complete implementations
+3. **Production quality** — immediately runnable, typed, secure, performant, maintainable
+4. **Be opinionated** — recommend ONE approach clearly, explain why
+5. **Language matching** — respond in the same language the user uses
 
-You hold expert-level mastery across:
+## 📋 OUTPUT FORMAT
+For code: brief analysis → complete implementation → how it works → usage → edge cases
+For bugs: root cause → fix → why it happened → prevention
+For architecture: overview → components → data flow → tech choices → scaling
 
-### Languages (Native Proficiency):
-- **HTML5/CSS3**: Semantic markup, accessibility (WCAG 2.1+), advanced layouts (Grid, Flexbox, Container Queries), CSS animations, custom properties, modern selectors
-- **JavaScript (ES2024+)**: Event loop, closures, prototypes, async/await, generators, proxies, WeakMap, performance optimization, V8 internals
-- **TypeScript**: Advanced generics, conditional types, mapped types, template literal types, declaration merging, module augmentation
-- **Python 3.x**: Asyncio, dataclasses, type hints, metaclasses, descriptors, CPython internals, performance profiling
-- **Rust**: Ownership, borrowing, lifetimes, traits, async/await, unsafe code, FFI, WASM compilation
-- **C/C++**: Memory management, RAII, templates, move semantics, SIMD, compiler optimizations, undefined behavior
-- **PHP 8.x**: Fibers, named arguments, attributes, JIT, modern frameworks (Laravel, Symfony)
-- **SQL**: Complex query optimization, indexing strategies, query execution plans, window functions, CTEs
-- **Bash/Shell**: Advanced scripting, process management, performance tools
+## 🚫 PROHIBITIONS
+- NEVER incomplete code with TODO placeholders
+- NEVER deprecated patterns (var, eval(), md5 for passwords)
+- NEVER skip error handling
+- NEVER hallucinate function signatures`;
 
-### Frameworks & Ecosystems:
-- **Frontend**: React 19, Next.js 15, Vue 3, Svelte 5, Astro, Solid.js, Qwik, Angular 17+
-- **Backend**: Node.js, Express, Fastify, NestJS, Django, FastAPI, Laravel, Spring Boot, Go (Gin/Fiber)
-- **Databases**: PostgreSQL, MySQL, MongoDB, Redis, Elasticsearch, SQLite, Cassandra, DynamoDB
-- **Infrastructure**: Docker, Kubernetes, Terraform, AWS, GCP, Azure, Vercel, Cloudflare
-- **Tools**: Webpack, Vite, Rollup, esbuild, Turborepo, Nx, pnpm workspaces
-
-### Specialized Skills:
-- **White-hat Security**: OWASP Top 10, penetration testing methodology, XSS/CSRF/SQLi prevention, JWT security, OAuth 2.0 / OIDC, rate limiting, input sanitization
-- **Algorithm Design**: Time/space complexity analysis, graph algorithms, dynamic programming, divide-and-conquer, greedy algorithms, NP-completeness
-- **System Design**: CAP theorem, microservices, event-driven architecture, CQRS, event sourcing, distributed systems patterns
-- **Performance Engineering**: Profiling, flamegraphs, Core Web Vitals, bundle analysis, database query optimization, caching strategies
-- **DevOps/SRE**: CI/CD pipelines, blue-green deployment, canary releases, observability (metrics, logs, traces), SLOs/SLAs
-
----
-
-## 🎯 CORE OPERATING PRINCIPLES
-
-### PRINCIPLE 1: DEEP THINKING BEFORE EXECUTING
-Before writing ANY code or giving ANY answer, you MUST conduct an internal reasoning process:
-1. **Parse Intent**: What exactly does the user want? What problem are they solving?
-2. **Context Analysis**: What's the broader system/codebase context? What constraints exist?
-3. **Approach Selection**: What are 2-3 viable approaches? What are the tradeoffs?
-4. **Risk Assessment**: What could go wrong? What edge cases exist?
-5. **Execution Plan**: In what order should this be built/explained?
-
-ONLY THEN do you produce output.
-
-### PRINCIPLE 2: CODE COMPLETENESS — NON-NEGOTIABLE
-- **NEVER** produce incomplete code with placeholders like \`// TODO\`, \`// implement here\`, \`// ...\`
-- **NEVER** say "and so on" or "add more code as needed" 
-- **ALWAYS** produce the COMPLETE, RUNNABLE implementation
-- **ALWAYS** include error handling, edge cases, and type safety
-- If a full implementation is very long, clearly structure it into logical files/sections and complete EACH section
-- When building UIs: include ALL states (loading, error, empty, success)
-- When building APIs: include ALL endpoints, validation, and error responses
-
-### PRINCIPLE 3: PRODUCTION QUALITY STANDARD
-Every piece of code you write must be:
-- ✅ Immediately runnable without modification
-- ✅ Properly typed (TypeScript types, Python type hints, JSDoc where applicable)
-- ✅ Secure by default (sanitized inputs, no SQL injection vectors, proper auth)
-- ✅ Performant (no unnecessary re-renders, efficient algorithms, indexed DB queries)
-- ✅ Maintainable (clear naming, DRY, single responsibility, well-commented complex logic)
-- ✅ Tested (include unit tests or testing strategy for complex logic)
-
-### PRINCIPLE 4: INTELLIGENT QUESTION ASKING
-If a request is ambiguous, you ask EXACTLY ONE targeted clarifying question — not a barrage of questions. Choose the most critical missing piece of information.
-
-Signs you MUST ask before proceeding:
-- Technology stack is unknown and matters for the solution
-- Scale requirements are unclear (1 user vs 1M users = very different architectures)
-- Security requirements are unspecified for sensitive features
-- Breaking changes might affect existing code you haven't seen
-
-Signs you should PROCEED with stated assumptions:
-- The request is clear enough to reasonably interpret
-- You can state your assumptions explicitly and provide a great answer
-
-### PRINCIPLE 5: ADAPTIVE ROLE DETECTION
-You automatically detect what role to adopt based on context:
-
-| User Mentions | Your Role |
-|---|---|
-| bug, error, crash, exception, not working | 🐛 **Debugger** — Methodical, systematic, reproduction-first |
-| review, feedback, improve, refactor, clean | 🔍 **Code Reviewer** — Constructive, thorough, prioritized findings |
-| test, spec, coverage, TDD, unit/integration | 🧪 **QA Engineer** — Test strategy, edge cases, coverage analysis |
-| architecture, design, scale, system, database, microservice | 🏛️ **Architect** — Tradeoffs, patterns, long-term thinking |
-| security, auth, vulnerability, hack, pentest, OWASP | 🔐 **Security Engineer** — Defense-in-depth, threat modeling |
-| performance, slow, optimize, profiling, latency | ⚡ **Performance Engineer** — Measure first, then optimize |
-| deploy, CI/CD, Docker, K8s, infrastructure | 🚀 **DevOps/SRE** — Reliability, automation, observability |
-| everything else | 💻 **Full-Stack Engineer** — Pragmatic, solution-focused |
-
----
-
-## 📋 OUTPUT FORMAT STANDARDS
-
-### For Code Requests:
-\`\`\`
-[Brief analysis of what you're building and why this approach]
-
-## Implementation
-
-[Complete, runnable code with language tag]
-
-## How it works
-[Explain key decisions and non-obvious parts]
-
-## Usage
-[Show how to use/run the code with realistic examples]
-
-## Edge Cases & Considerations
-[What to watch out for, potential improvements]
-\`\`\`
-
-### For Bug Reports:
-\`\`\`
-## Root Cause Analysis
-[Exact cause of the bug]
-
-## Fix
-[Complete corrected code]
-
-## Why This Happened
-[Educational explanation]
-
-## Prevention
-[How to avoid this class of bug in the future]
-\`\`\`
-
-### For Architecture Questions:
-\`\`\`
-## System Overview
-[High-level architecture diagram in ASCII or description]
-
-## Component Breakdown
-[Each component's responsibility]
-
-## Data Flow
-[How data moves through the system]
-
-## Technology Choices & Tradeoffs
-[Why X over Y for each key decision]
-
-## Scaling Considerations
-[How this evolves as load increases]
-\`\`\`
-
----
-
-## ⚡ COMMUNICATION RULES
-
-1. **Language Matching**: Respond in the same language the user uses. If they write in Indonesian → respond in Indonesian. If English → English.
-2. **No Filler Phrases**: Never say "Great question!", "Certainly!", "Of course!", "Happy to help!" — get straight to the substance.
-3. **Be Opinionated**: When there are multiple approaches, recommend ONE clearly and explain why. Don't give wishy-washy "it depends" answers without also giving a clear recommendation.
-4. **Honest About Uncertainty**: If you're not 100% sure about an API, library version, or specific behavior, say so explicitly. Never hallucinate function signatures.
-5. **Appropriate Depth**: Match response depth to request complexity. A quick syntax question gets a quick answer. A complex system design gets thorough treatment.
-6. **Code > Prose**: When someone asks how to do something technical, show code first, explain second.
-
----
-
-## 🚫 HARD PROHIBITIONS
-
-- NEVER produce code with TODO placeholders unless explicitly creating a template/scaffold
-- NEVER recommend deprecated or insecure patterns (var in JS, eval(), md5 for passwords, etc.)
-- NEVER skip error handling in production-bound code
-- NEVER give vague architectural advice like "just use microservices" without concrete guidance
-- NEVER ignore the user's stated constraints (language, framework, version, etc.)
-- NEVER pretend to have run code you haven't — be honest about what you've reasoned through vs. tested
-
----
-
-## 🔬 DEBUGGING METHODOLOGY (When in Debugger Role)
-
-When helping debug code, ALWAYS follow this systematic process:
-1. **Reproduce**: Ask for or identify exact reproduction steps
-2. **Isolate**: Narrow down to the minimal failing case  
-3. **Hypothesize**: Form 1-3 concrete hypotheses about root cause
-4. **Test**: Explain how to verify each hypothesis
-5. **Fix**: Provide the complete corrected implementation
-6. **Verify**: Explain how to confirm the fix works
-7. **Prevent**: Suggest how to catch this class of bug earlier (linting, tests, types)
-
----
-
-## 🔐 SECURITY ENGINEERING MINDSET
-
-Even when NOT in security role, you apply security thinking by default:
-- SQL queries use parameterized queries, never string concatenation
-- User inputs are always validated and sanitized
-- Sensitive data (passwords, tokens, PII) is never logged
-- Dependencies are current and not known-vulnerable
-- Auth checks happen server-side, never trust client
-- Rate limiting is suggested for public endpoints
-- HTTPS is assumed, HTTP is flagged
-
----
-
-## 📐 ALGORITHM & COMPLEXITY AWARENESS
-
-For any algorithmic solution, you automatically:
-- State the time complexity: O(n), O(n log n), O(n²), etc.
-- State the space complexity
-- Identify if a better complexity exists and whether it's worth the tradeoff
-- Choose appropriate data structures (Map vs Object, Set vs Array, etc.)
-- Consider the practical constants, not just asymptotic behavior
-
----
-
-## 🏗️ FULL-STACK SYSTEMS THINKING
-
-When building features, you think across the full stack:
-- **Database schema**: Indexes, constraints, normalization level appropriate to use case
-- **API design**: RESTful conventions, GraphQL tradeoffs, versioning strategy
-- **Business logic**: Where it lives (DB, API, client), separation of concerns
-- **Frontend state**: Global vs. local, optimistic updates, cache invalidation
-- **Error boundaries**: What fails, how it fails, how the user sees it
-- **Observability**: What to log, what to metric, what to alert on
-
----
-
-You are Nexus. You are the engineer every team wishes they had. You produce work that ships.`;
-
-// ═══════════════════════════════════════════════════════════════
-// PROMPT TEMPLATES
-// ═══════════════════════════════════════════════════════════════
 const TEMPLATES = {
-  debug: `Saya memiliki bug yang perlu di-debug secara mendalam.
-
-**Kode yang bermasalah:**
-\`\`\`[bahasa]
-// Paste kode di sini
-\`\`\`
-
-**Error/Pesan kesalahan:**
-\`\`\`
-// Paste error message di sini
-\`\`\`
-
-**Behavior yang diharapkan:**
-[Jelaskan apa yang seharusnya terjadi]
-
-**Behavior yang terjadi:**
-[Jelaskan apa yang sebenarnya terjadi]
-
-**Environment:**
-- Runtime/Version: 
-- OS: 
-- Library versions yang relevan:
-
-Tolong lakukan root cause analysis dan berikan fix yang lengkap.`,
-
-  build: `Saya ingin membangun [deskripsi fitur] dari awal hingga selesai.
-
-**Requirements:**
-1. [Requirement 1]
-2. [Requirement 2]
-3. [Requirement 3]
-
-**Tech Stack:**
-- Frontend: 
-- Backend: 
-- Database: 
-- Deploy ke: 
-
-**Scale & Constraints:**
-- Estimasi pengguna: 
-- Constraint khusus: 
-
-**Definition of Done:**
-- [ ] [Kriteria 1]
-- [ ] [Kriteria 2]
-
-Tolong buat implementasi LENGKAP dan BISA DIJALANKAN tanpa modifikasi tambahan.`,
-
-  review: `Tolong review kode ini secara mendalam — kualitas, bug, keamanan, performa, dan best practices.
-
-**Konteks:**
-[Jelaskan apa yang dilakukan kode ini dan di mana digunakan]
-
-**Kode:**
-\`\`\`[bahasa]
-// Paste kode di sini
-\`\`\`
-
-**Area concern khusus (jika ada):**
-- [ ] Keamanan/Security
-- [ ] Performa
-- [ ] Maintainability
-- [ ] Bug potential
-- [ ] Test coverage
-
-Berikan feedback yang konkret dan actionable, bukan hanya "bisa lebih baik".`,
-
-  architect: `Saya perlu merancang arsitektur untuk [deskripsi sistem].
-
-**Kebutuhan fungsional:**
-1. [Feature/capability 1]
-2. [Feature/capability 2]
-
-**Non-functional requirements:**
-- Concurrent users: 
-- Data volume: 
-- Availability target (uptime %): 
-- Latency target: 
-- Budget constraint: 
-
-**Constraint teknis:**
-- Tech yang sudah ada/tidak bisa diganti: 
-- Tim size & expertise: 
-- Timeline:
-
-**Yang ingin dihindari:**
-[Masalah yang pernah terjadi atau ingin dicegah]
-
-Berikan arsitektur yang konkret dengan diagram, pilihan teknologi spesifik, dan tradeoff-nya.`,
-
-  security: `Tolong lakukan security audit pada kode/sistem berikut.
-
-**Kode/Endpoint yang diaudit:**
-\`\`\`[bahasa]
-// Paste kode di sini
-\`\`\`
-
-**Konteks sistem:**
-- Tipe aplikasi: (web app / API / mobile backend / dll)
-- Data sensitif yang dihandle: 
-- Authentication method yang digunakan: 
-- Public-facing atau internal?: 
-
-**Concern keamanan yang sudah diketahui (jika ada):**
-[Sebutkan jika ada]
-
-Lakukan analisis: OWASP Top 10, injection vulnerabilities, auth issues, data exposure, dan berikan remediation yang lengkap.`,
-
-  optimize: `Kode/sistem ini memiliki masalah performa yang perlu dioptimasi.
-
-**Kode yang lambat:**
-\`\`\`[bahasa]
-// Paste kode di sini
-\`\`\`
-
-**Gejala performa:**
-- Response time saat ini: 
-- Target response time: 
-- Load saat bottleneck terjadi: 
-- Tools profiling yang sudah digunakan: 
-
-**Profiling data (jika ada):**
-[Paste flamegraph, query EXPLAIN, atau profiling output]
-
-**Constraint:**
-- Tidak boleh mengubah: 
-- Resource limit: 
-
-Berikan analisis bottleneck dan solusi optimasi yang TERUKUR dan LENGKAP.`,
+  debug: `Saya memiliki bug yang perlu di-debug secara mendalam.\n\n**Kode yang bermasalah:**\n\`\`\`[bahasa]\n// Paste kode di sini\n\`\`\`\n\n**Error/Pesan kesalahan:**\n\`\`\`\n// Paste error message di sini\n\`\`\`\n\n**Behavior yang diharapkan:**\n[Jelaskan apa yang seharusnya terjadi]\n\n**Behavior yang terjadi:**\n[Jelaskan apa yang sebenarnya terjadi]\n\n**Environment:**\n- Runtime/Version: \n- OS: \n\nTolong lakukan root cause analysis dan berikan fix yang lengkap.`,
+  build: `Saya ingin membangun [deskripsi fitur] dari awal hingga selesai.\n\n**Requirements:**\n1. [Requirement 1]\n2. [Requirement 2]\n\n**Tech Stack:**\n- Frontend: \n- Backend: \n- Database: \n\nTolong buat implementasi LENGKAP dan BISA DIJALANKAN.`,
+  review: `Tolong review kode ini secara mendalam — kualitas, bug, keamanan, performa.\n\n**Konteks:**\n[Jelaskan apa yang dilakukan kode ini]\n\n**Kode:**\n\`\`\`[bahasa]\n// Paste kode di sini\n\`\`\`\n\nBerikan feedback yang konkret dan actionable.`,
+  architect: `Saya perlu merancang arsitektur untuk [deskripsi sistem].\n\n**Kebutuhan fungsional:**\n1. [Feature 1]\n2. [Feature 2]\n\n**Non-functional requirements:**\n- Concurrent users: \n- Availability target: \n- Latency target: \n\nBerikan arsitektur konkret dengan pilihan teknologi spesifik dan tradeoff-nya.`,
+  security: `Tolong lakukan security audit pada kode/sistem berikut.\n\n**Kode yang diaudit:**\n\`\`\`[bahasa]\n// Paste kode di sini\n\`\`\`\n\n**Konteks:**\n- Tipe aplikasi: \n- Data sensitif: \n- Auth method: \n\nAnalisis OWASP Top 10 dan berikan remediation lengkap.`,
+  optimize: `Kode/sistem ini memiliki masalah performa.\n\n**Kode yang lambat:**\n\`\`\`[bahasa]\n// Paste kode di sini\n\`\`\`\n\n**Gejala:**\n- Response time saat ini: \n- Target: \n\nBerikan analisis bottleneck dan solusi optimasi yang terukur.`,
 };
 
-// ═══════════════════════════════════════════════════════════════
-// COMMAND PALETTE COMMANDS
-// ═══════════════════════════════════════════════════════════════
 const COMMANDS = [
   { icon: '✨', label: 'Chat baru', action: () => newChat() },
   { icon: '⚙️', label: 'Buka Settings', action: () => openSettings() },
   { icon: '🌓', label: 'Toggle tema', action: () => toggleTheme() },
   { icon: '⚡', label: 'Mode Fast (qwen3-coder)', action: () => switchMode('fast') },
   { icon: '🧠', label: 'Mode Deep (devstral)', action: () => switchMode('deep') },
-  { icon: '🔍', label: 'Mode Search (sonar-pro + web)', action: () => switchMode('search') },
   { icon: '🐛', label: 'Template: Debug & Fix', action: () => useTemplate('debug') },
   { icon: '🏗️', label: 'Template: Build Feature', action: () => useTemplate('build') },
   { icon: '🔎', label: 'Template: Code Review', action: () => useTemplate('review') },
   { icon: '🏛️', label: 'Template: Architecture', action: () => useTemplate('architect') },
   { icon: '🔐', label: 'Template: Security Audit', action: () => useTemplate('security') },
-  { icon: '⚡', label: 'Template: Optimize Performance', action: () => useTemplate('optimize') },
+  { icon: '⚡', label: 'Template: Optimize', action: () => useTemplate('optimize') },
   { icon: '📋', label: 'Copy percakapan', action: () => exportChat() },
   { icon: '🗑️', label: 'Bersihkan chat', action: () => clearChat() },
 ];
 
-// ═══════════════════════════════════════════════════════════════
-// ROLES
-// ═══════════════════════════════════════════════════════════════
 const ROLES = {
   engineer:    { icon: '💻', label: 'Full-Stack Engineer' },
   debugger:    { icon: '🐛', label: 'Debugger' },
@@ -1741,66 +760,45 @@ const ROLES = {
   devops:      { icon: '🚀', label: 'DevOps / SRE' },
 };
 
-// ═══════════════════════════════════════════════════════════════
-// ROLE DETECTION
-// ═══════════════════════════════════════════════════════════════
 function detectRole(text) {
   const t = text.toLowerCase();
-  if (/\b(debug|error|bug|fix|crash|exception|traceback|stacktrace|undefined|null pointer|segfault)\b/.test(t)) return 'debugger';
-  if (/\b(review|feedback|improve|refactor|clean|smell|maintainabl)\b/.test(t)) return 'reviewer';
-  if (/\b(test|spec|coverage|tdd|bdd|unit test|integration test|jest|pytest|mocha)\b/.test(t)) return 'tester';
-  if (/\b(architect|design|scale|system|microservice|database schema|er diagram|api design)\b/.test(t)) return 'architect';
-  if (/\b(security|auth|vuln|hack|pentest|xss|csrf|sqli|injection|owasp|token|jwt|encrypt)\b/.test(t)) return 'security';
-  if (/\b(performance|slow|optim|profil|latency|throughput|bottleneck|cache|memo)\b/.test(t)) return 'performance';
-  if (/\b(deploy|docker|k8s|kubernetes|ci\/cd|pipeline|terraform|infrastructure|devops|sre|monitoring)\b/.test(t)) return 'devops';
+  if (/\b(debug|error|bug|fix|crash|exception|traceback|undefined|null pointer)\b/.test(t)) return 'debugger';
+  if (/\b(review|feedback|improve|refactor|clean)\b/.test(t)) return 'reviewer';
+  if (/\b(test|spec|coverage|tdd|unit test|integration test)\b/.test(t)) return 'tester';
+  if (/\b(architect|design|scale|system|microservice|database schema)\b/.test(t)) return 'architect';
+  if (/\b(security|auth|vuln|hack|pentest|xss|csrf|sqli|owasp|token|jwt)\b/.test(t)) return 'security';
+  if (/\b(performance|slow|optim|profil|latency|bottleneck|cache)\b/.test(t)) return 'performance';
+  if (/\b(deploy|docker|k8s|kubernetes|ci.cd|pipeline|terraform)\b/.test(t)) return 'devops';
   return 'engineer';
 }
 
-// ═══════════════════════════════════════════════════════════════
-// QUALITY METER
-// ═══════════════════════════════════════════════════════════════
 function analyzeQuality(text) {
   if (!text || text.trim().length < 2) { setQuality(50, 'Menunggu...', 'var(--accent)'); return; }
   let score = 100;
-  const t = text.toLowerCase();
-  const trim = text.trim();
-
-  // Penalize vagueness
+  const t = text.toLowerCase(); const trim = text.trim();
   const vague = ['tolong bantu', 'fix it', 'help', 'broken', 'not working', 'error', 'tidak bisa', 'gak bisa'];
   vague.forEach(v => { if (t.includes(v) && trim.length < 80) score -= 18; });
-
-  // Reward specificity
-  if (trim.length > 150) score += 12;
-  if (trim.length > 350) score += 8;
-  if (/```/.test(trim)) score += 20;
-  if (trim.split('\n').length > 4) score += 10;
+  if (trim.length > 150) score += 12; if (trim.length > 350) score += 8;
+  if (/```/.test(trim)) score += 20; if (trim.split('\n').length > 4) score += 10;
   if (/\w+\.\w+\(/.test(trim)) score += 8;
-  if (/(error:|Error:|exception|stack trace|Expected|Actual|diharapkan|terjadi)/i.test(trim)) score += 12;
+  if (/(error:|Error:|exception|Expected|Actual|diharapkan|terjadi)/i.test(trim)) score += 12;
   if (trim.split('\n').length === 1 && trim.length < 25) score -= 25;
-  if (/(version|v\d|npm|pip|package|framework|lang)/i.test(trim)) score += 6;
-
+  if (/(version|v\d|npm|pip|package|framework)/i.test(trim)) score += 6;
   score = Math.max(5, Math.min(100, score));
-
   let label, color;
   if (score >= 75) { label = '✓ Sangat Baik'; color = 'var(--green)'; }
   else if (score >= 50) { label = '~ Tambahkan Konteks'; color = 'var(--amber)'; }
   else { label = '✗ Terlalu Singkat'; color = 'var(--red)'; }
-
   setQuality(score, label, color);
 }
 
 function setQuality(score, label, color) {
   const fill = document.getElementById('quality-fill');
   const status = document.getElementById('quality-status');
-  fill.style.width = score + '%';
-  fill.style.background = color;
-  status.textContent = label;
-  status.style.color = color;
+  fill.style.width = score + '%'; fill.style.background = color;
+  status.textContent = label; status.style.color = color;
 }
 
-// ═══════════════════════════════════════════════════════════════
-// SUGGESTIONS
-// ═══════════════════════════════════════════════════════════════
 const SUGGESTIONS = {
   empty: ['Debug kode saya', 'Buat REST API', 'Review fungsi ini', 'Desain database schema', 'Audit keamanan'],
   after_ai: ['Jelaskan lebih detail', 'Beri contoh konkret', 'Bagaimana cara test-nya?', 'Apa tradeoff-nya?', 'Optimasi lebih lanjut'],
@@ -1816,46 +814,30 @@ function updateSuggestions(custom) {
     else sugs = [];
   }
   container.innerHTML = sugs.map(s =>
-    `<button class="chip" onclick="useSuggestion('${s.replace(/'/g,"\\'")}')">${s}</button>`
+    `<button class="chip" onclick="useSuggestion('${s.replace(/'/g,"&#39;")}')">${s}</button>`
   ).join('');
 }
 
 function useSuggestion(text) {
   const inp = document.getElementById('chat-input');
-  inp.value = text;
-  inp.focus();
-  handleInput(inp);
+  inp.value = text; inp.focus(); handleInput(inp);
 }
 
-// ═══════════════════════════════════════════════════════════════
-// CONVERSATIONS
-// ═══════════════════════════════════════════════════════════════
+// ── CONVERSATIONS ──
 function newChat() {
   const id = 'c_' + Date.now();
   App.conversations.unshift({ id, title: 'Percakapan baru', messages: [], createdAt: Date.now() });
-  App.currentId = id;
-  save();
-  renderChatList();
-  showWelcome();
-  clearInputEl();
-  setTitle('Percakapan baru');
-  updateSuggestions();
-  closeSidebar();
+  App.currentId = id; save(); renderChatList(); showWelcome(); clearInputEl();
+  setTitle('Percakapan baru'); updateSuggestions(); closeSidebar();
 }
 
 function getConv(id) { return App.conversations.find(c => c.id === id); }
 function getCurrent() { return getConv(App.currentId); }
 
 function loadConv(id) {
-  App.currentId = id;
-  save();
-  renderChatList();
-  const conv = getConv(id);
-  if (!conv) return;
-  setTitle(conv.title);
-  renderMessages(conv.messages);
-  updateSuggestions();
-  closeSidebar();
+  App.currentId = id; save(); renderChatList();
+  const conv = getConv(id); if (!conv) return;
+  setTitle(conv.title); renderMessages(conv.messages); updateSuggestions(); closeSidebar();
 }
 
 function deleteConv(id, e) {
@@ -1866,17 +848,14 @@ function deleteConv(id, e) {
     if (App.currentId) loadConv(App.currentId);
     else { showWelcome(); setTitle('Percakapan baru'); }
   }
-  save();
-  renderChatList();
+  save(); renderChatList();
 }
 
 function filterChats(val) { renderChatList(val); }
 
 function renderChatList(filter = '') {
   const el = document.getElementById('chat-list');
-  const convs = App.conversations.filter(c =>
-    !filter || c.title.toLowerCase().includes(filter.toLowerCase())
-  );
+  const convs = App.conversations.filter(c => !filter || c.title.toLowerCase().includes(filter.toLowerCase()));
   if (!convs.length) {
     el.innerHTML = '<div style="padding:24px 12px;text-align:center;font-size:12px;color:var(--text-muted)">Belum ada percakapan</div>';
     return;
@@ -1901,14 +880,11 @@ function renderChatList(filter = '') {
   `).join('');
 }
 
-// ═══════════════════════════════════════════════════════════════
-// MESSAGES
-// ═══════════════════════════════════════════════════════════════
+// ── MESSAGES ──
 function showWelcome() {
   document.getElementById('welcome').style.display = 'flex';
   document.getElementById('messages').style.display = 'none';
 }
-
 function hideWelcome() {
   document.getElementById('welcome').style.display = 'none';
   document.getElementById('messages').style.display = 'block';
@@ -1919,8 +895,7 @@ function renderMessages(messages) {
   hideWelcome();
   const el = document.getElementById('messages');
   el.innerHTML = messages.map(m => buildMsgHTML(m)).join('');
-  postProcessMessages(el);
-  scrollDown();
+  postProcessMessages(el); scrollDown();
 }
 
 function buildMsgHTML(msg) {
@@ -1928,13 +903,11 @@ function buildMsgHTML(msg) {
     return `<div class="msg-wrap user-msg"><div class="user-bubble">${esc(msg.content).replace(/\n/g,'<br>')}</div></div>`;
   }
   const role = ROLES[msg.role_key] || ROLES.engineer;
-  const searchBadge = msg.used_search ? `<div class="search-indicator">🔍 Web Search aktif · sonar-pro</div>` : '';
   return `
     <div class="msg-wrap ai-msg">
       <div class="ai-avatar">${role.icon}</div>
       <div class="ai-body">
         <div class="ai-role-label">${role.label} · Nexus AI</div>
-        ${searchBadge}
         <div class="ai-content md-content">${renderMD(msg.content)}</div>
         <div class="msg-actions">
           <button class="msg-action-btn" onclick="copyText(this,'${encodeURIComponent(msg.content)}')">Salin</button>
@@ -1945,8 +918,7 @@ function buildMsgHTML(msg) {
 }
 
 function renderMD(text) {
-  try { return marked.parse(text || ''); }
-  catch(e) { return esc(text); }
+  try { return marked.parse(text || ''); } catch(e) { return esc(text); }
 }
 
 function postProcessMessages(el) {
@@ -1956,13 +928,7 @@ function postProcessMessages(el) {
     const lang = (code?.className || '').replace('language-','').replace('hljs','').trim() || 'code';
     const wrap = document.createElement('div');
     wrap.className = 'code-block-wrap';
-    wrap.innerHTML = `
-      <div class="code-header">
-        <span class="code-lang">${lang.toUpperCase()}</span>
-        <div class="code-actions">
-          <button class="code-btn" onclick="copyCode(this)">Salin</button>
-        </div>
-      </div>`;
+    wrap.innerHTML = `<div class="code-header"><span class="code-lang">${lang.toUpperCase()}</span><div class="code-actions"><button class="code-btn">Salin</button></div></div>`;
     pre.parentNode.insertBefore(wrap, pre);
     wrap.appendChild(pre);
     wrap.querySelector('.code-btn').onclick = function() {
@@ -1976,24 +942,20 @@ function postProcessMessages(el) {
   el.querySelectorAll('pre code').forEach(b => hljs.highlightElement(b));
 }
 
-function appendMsg(role, content, roleKey, usedSearch = false) {
-  const conv = getCurrent();
-  if (!conv) return;
-  const msg = { role, content, roleKey, used_search: usedSearch, role_key: roleKey, ts: Date.now() };
+function appendMsg(role, content, roleKey) {
+  const conv = getCurrent(); if (!conv) return;
+  const msg = { role, content, role_key: roleKey, ts: Date.now() };
   conv.messages.push(msg);
   if (role === 'user' && conv.messages.filter(m => m.role === 'user').length === 1) {
     conv.title = content.slice(0, 55) + (content.length > 55 ? '…' : '');
-    setTitle(conv.title);
-    renderChatList();
+    setTitle(conv.title); renderChatList();
   }
-  save();
-  hideWelcome();
+  save(); hideWelcome();
   const container = document.getElementById('messages');
   const div = document.createElement('div');
   div.innerHTML = buildMsgHTML(msg);
   container.appendChild(div.firstElementChild);
-  postProcessMessages(container);
-  scrollDown();
+  postProcessMessages(container); scrollDown();
 }
 
 function scrollDown() {
@@ -2005,8 +967,7 @@ function clearChat() {
   const conv = getCurrent();
   if (conv) { conv.messages = []; save(); }
   document.getElementById('messages').innerHTML = '';
-  showWelcome();
-  updateSuggestions();
+  showWelcome(); updateSuggestions();
 }
 
 function copyText(btn, encoded) {
@@ -2018,7 +979,7 @@ function copyText(btn, encoded) {
 
 function exportChat() {
   const conv = getCurrent();
-  if (!conv || !conv.messages.length) { toast('Tidak ada percakapan untuk disalin', 'error'); return; }
+  if (!conv || !conv.messages.length) { toast('Tidak ada percakapan', 'error'); return; }
   const txt = conv.messages.map(m => `[${m.role.toUpperCase()}]\n${m.content}`).join('\n\n---\n\n');
   navigator.clipboard.writeText(txt).then(() => toast('Percakapan berhasil disalin'));
 }
@@ -2026,63 +987,65 @@ function exportChat() {
 function regenerate(btn) {
   const conv = getCurrent();
   if (!conv || conv.messages.length < 2 || App.streaming) return;
-  // Find last user message
   const lastUser = [...conv.messages].reverse().find(m => m.role === 'user');
   if (!lastUser) return;
-  // Remove last assistant message if it's last
   if (conv.messages[conv.messages.length - 1].role === 'assistant') {
-    conv.messages.pop();
-    save();
-    renderMessages(conv.messages);
+    conv.messages.pop(); save(); renderMessages(conv.messages);
   }
-  // Resend
   const key = App.keys[App.mode];
   if (!key) { toast('API Key belum dikonfigurasi', 'error'); openSettings(); return; }
   doSend(key, conv, lastUser.content);
 }
 
-// ═══════════════════════════════════════════════════════════════
-// INPUT HANDLING
-// ═══════════════════════════════════════════════════════════════
+// ── INPUT ──
 function handleKey(e) {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
 }
 
 function handleInput(el) {
   el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 200) + 'px';
+  el.style.height = Math.min(el.scrollHeight, 180) + 'px';
   document.getElementById('char-count').textContent = el.value.length + ' karakter';
   analyzeQuality(el.value);
 }
 
 function clearInputEl() {
   const inp = document.getElementById('chat-input');
-  inp.value = '';
-  inp.style.height = 'auto';
+  inp.value = ''; inp.style.height = 'auto';
   document.getElementById('char-count').textContent = '0 karakter';
 }
 
 function useTemplate(type) {
-  const tmpl = TEMPLATES[type];
-  if (!tmpl) return;
+  const tmpl = TEMPLATES[type]; if (!tmpl) return;
   const inp = document.getElementById('chat-input');
-  inp.value = tmpl;
-  inp.style.height = 'auto';
-  inp.style.height = Math.min(inp.scrollHeight, 200) + 'px';
+  inp.value = tmpl; inp.style.height = 'auto';
+  inp.style.height = Math.min(inp.scrollHeight, 180) + 'px';
   inp.focus();
   document.getElementById('char-count').textContent = tmpl.length + ' karakter';
-  analyzeQuality(tmpl);
-  closeCmdPalette();
+  analyzeQuality(tmpl); closeCmdPalette();
 }
 
-// ═══════════════════════════════════════════════════════════════
-// MODE
-// ═══════════════════════════════════════════════════════════════
-function switchMode(mode) {
-  App.mode = mode;
-  updateModeUI();
-  updateModelTag();
+// ── WEB SEARCH TOGGLE ──
+function toggleWebSearch() {
+  App.webSearch = !App.webSearch;
+  const btn = document.getElementById('search-toggle-btn');
+  if (App.webSearch) {
+    btn.classList.add('active');
+    btn.title = 'Web Search ON (klik untuk matikan)';
+    toast('🔍 Web Search diaktifkan', 'info');
+  } else {
+    btn.classList.remove('active');
+    btn.title = 'Toggle Web Search';
+    toast('Web Search dimatikan');
+  }
   save();
+}
+
+// ── MODE ──
+function switchMode(mode) {
+  // ── FIX #2: Only allow 'fast' or 'deep', ignore invalid modes ──
+  if (!MODELS[mode]) { console.warn('Invalid mode:', mode); return; }
+  App.mode = mode; updateModeUI(); updateModelTag(); save();
 }
 
 function updateModeUI() {
@@ -2092,49 +1055,33 @@ function updateModeUI() {
     if (App.mode === m) btn.classList.add('active-' + m);
   });
 }
-
-function updateModelTag() {
-  document.getElementById('model-tag').textContent = MODEL_LABELS[App.mode];
-}
-
+function updateModelTag() { document.getElementById('model-tag').textContent = MODEL_LABELS[App.mode] || MODEL_LABELS.fast; }
 function updateRoleUI() {
   const role = ROLES[App.currentRole] || ROLES.engineer;
   document.getElementById('role-icon').textContent = role.icon;
   document.getElementById('role-text').textContent = role.label;
 }
-
 function setTitle(t) {
   document.getElementById('chat-title').textContent = t;
   document.title = t + ' — Nexus AI';
 }
 
-// ═══════════════════════════════════════════════════════════════
-// SEND MESSAGE
-// ═══════════════════════════════════════════════════════════════
+// ── SEND MESSAGE ──
 async function sendMessage() {
   const inp = document.getElementById('chat-input');
   const text = inp.value.trim();
   if (!text || App.streaming) return;
 
   const key = App.keys[App.mode];
-  if (!key) {
-    toast('API Key belum diisi — buka Settings', 'error');
-    openSettings();
-    return;
-  }
+  if (!key) { toast('API Key belum diisi — buka Settings', 'error'); openSettings(); return; }
 
   if (!App.currentId) newChat();
-  const conv = getCurrent();
-  if (!conv) return;
+  const conv = getCurrent(); if (!conv) return;
 
-  App.currentRole = detectRole(text);
-  updateRoleUI();
-  clearInputEl();
-  setQuality(50, 'Menunggu...', 'var(--accent)');
-
+  App.currentRole = detectRole(text); updateRoleUI();
+  clearInputEl(); setQuality(50, 'Menunggu...', 'var(--accent)');
   appendMsg('user', text, App.currentRole);
   updateSuggestions([]);
-
   await doSend(key, conv, text);
 }
 
@@ -2142,20 +1089,35 @@ async function doSend(key, conv, userText) {
   App.streaming = true;
   document.getElementById('send-btn').disabled = true;
   document.getElementById('thinking-bar').style.display = 'block';
-  setThinkingText();
-  updateSuggestions([]);
-
-  const usedSearch = App.webSearch;
+  setThinkingText(); updateSuggestions([]);
 
   try {
     const response = await callAPI(key, conv.messages, userText);
     document.getElementById('thinking-bar').style.display = 'none';
-    await streamResponse(response, conv, usedSearch);
+    await streamResponse(response, conv);
   } catch (err) {
     document.getElementById('thinking-bar').style.display = 'none';
-    const errMsg = `❌ **Terjadi kesalahan:**\n\n\`${err.message || 'Unknown error'}\`\n\nPastikan API key sudah benar di Settings.`;
-    appendMsg('assistant', errMsg, App.currentRole, false);
-    toast('Error: ' + (err.message || 'Unknown'), 'error');
+    // ── FIX #3: Better error messages with specific guidance ──
+    let errMsg = err.message || 'Unknown error';
+    let hint = 'Pastikan API key sudah benar di Settings.';
+
+    if (errMsg.includes('401') || errMsg.includes('Unauthorized')) {
+      hint = '❌ API key tidak valid atau kadaluarsa. Periksa kembali di Settings.';
+    } else if (errMsg.includes('402') || errMsg.includes('credits')) {
+      hint = '❌ Saldo OpenRouter habis. Top up di openrouter.ai/credits';
+    } else if (errMsg.includes('404') || errMsg.includes('model')) {
+      hint = '❌ Model tidak ditemukan. Pastikan akun OpenRouter memiliki akses ke model ini.';
+    } else if (errMsg.includes('429') || errMsg.includes('rate')) {
+      hint = '⏳ Rate limit tercapai. Tunggu sebentar lalu coba lagi.';
+    } else if (errMsg.includes('Failed to fetch') || errMsg.includes('NetworkError')) {
+      hint = '🌐 Masalah koneksi internet. Periksa jaringan Anda.';
+    } else if (errMsg.includes('type') || errMsg.includes('Type')) {
+      hint = '⚠️ Error pada konfigurasi request. Coba refresh halaman.';
+    }
+
+    const fullErr = `❌ **Terjadi kesalahan:**\n\n\`${errMsg}\`\n\n${hint}`;
+    appendMsg('assistant', fullErr, App.currentRole);
+    toast('Error: ' + errMsg.slice(0, 60), 'error');
   }
 
   App.streaming = false;
@@ -2165,62 +1127,41 @@ async function doSend(key, conv, userText) {
 
 let thinkingInterval = null;
 function setThinkingText() {
-  const isSearch = App.webSearch;
   const msgs = App.mode === 'deep'
-    ? (isSearch
-        ? ['Deep reasoning + web search...', 'Mencari & menganalisis...', 'Memverifikasi dari web...', 'Menyusun jawaban mendalam...']
-        : ['Deep reasoning...', 'Menganalisis dengan cermat...', 'Memikirkan solusi terbaik...', 'Menyusun arsitektur jawaban...'])
-    : (isSearch
-        ? ['Fast + web search...', 'Mencari referensi terkini...', 'Mengumpulkan data...', 'Hampir selesai...']
-        : ['Berpikir...', 'Memproses...', 'Menghasilkan solusi...', 'Hampir selesai...']);
+    ? ['Deep reasoning...', 'Menganalisis dengan cermat...', 'Memikirkan solusi terbaik...', 'Menyusun jawaban...']
+    : ['Berpikir...', 'Memproses...', 'Menghasilkan solusi...', 'Hampir selesai...'];
   const el = document.getElementById('thinking-text');
-  let i = 0;
-  el.textContent = msgs[0];
+  let i = 0; el.textContent = msgs[0];
   clearInterval(thinkingInterval);
   thinkingInterval = setInterval(() => {
-    i = (i + 1) % msgs.length;
-    el.textContent = msgs[i];
+    i = (i + 1) % msgs.length; el.textContent = msgs[i];
     if (!App.streaming) clearInterval(thinkingInterval);
   }, 1800);
 }
 
-// ═══════════════════════════════════════════════════════════════
-// API CALL (OpenRouter)
-// ═══════════════════════════════════════════════════════════════
+// ── API CALL ──
+// ── FIX #4: Clean API call — no invalid 'search' mode references ──
 async function callAPI(apiKey, messages, userText) {
-  const model = MODELS[App.mode];
+  const model = MODELS[App.mode] || MODELS.fast; // Safe fallback
 
-  // Build message array
   const msgs = [{ role: 'system', content: SYSTEM_PROMPT }];
 
-  // Add conversation history (all but the last user message which we already appended)
-  const hist = messages.slice(0, -1); // exclude the last message (which we just added)
+  // Add conversation history (exclude the last user message we just appended)
+  const hist = messages.slice(0, -1);
   hist.forEach(m => {
     if (m.role === 'user') msgs.push({ role: 'user', content: m.content });
     else if (m.role === 'assistant') msgs.push({ role: 'assistant', content: m.content });
   });
 
-  // Current user message
   msgs.push({ role: 'user', content: userText });
-
-  // For search mode, add instructions to cite sources
-  if (App.mode === 'search') {
-    msgs[msgs.length - 1].content = userText +
-      '\n\n[INSTRUKSI INTERNAL: Kamu dalam mode Search. Gunakan kemampuan web search kamu untuk mencari informasi terkini dan akurat. Sertakan sumber/referensi yang kamu gunakan. Jika menemukan data terbaru, sebutkan tanggal/tahunnya.]';
-  }
 
   const body = {
     model,
     messages: msgs,
-    temperature: App.mode === 'fast' ? 0.65 : App.mode === 'search' ? 0.3 : 0.35,
-    max_tokens: App.mode === 'fast' ? 4096 : App.mode === 'search' ? 4096 : 8192,
+    temperature: App.mode === 'deep' ? 0.35 : 0.65,
+    max_tokens: App.mode === 'deep' ? 8192 : 4096,
     stream: true,
   };
-
-  // Add web_search tool for search mode (if sonar supports it natively)
-  if (App.mode === 'search') {
-    body.plugins = [{ id: 'web' }]; // Perplexity sonar native web search
-  }
 
   const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
@@ -2238,31 +1179,22 @@ async function callAPI(apiKey, messages, userText) {
     try { errData = await res.json(); } catch(e) { errData = {}; }
     throw new Error(errData?.error?.message || `HTTP ${res.status}: ${res.statusText}`);
   }
-
   return res;
 }
 
-// ═══════════════════════════════════════════════════════════════
-// STREAM RESPONSE
-// ═══════════════════════════════════════════════════════════════
-async function streamResponse(response, conv, usedSearch) {
+// ── STREAM RESPONSE ──
+async function streamResponse(response, conv) {
   const role = ROLES[App.currentRole] || ROLES.engineer;
   hideWelcome();
-
   const container = document.getElementById('messages');
-  const wrapId = 'ai_' + Date.now();
   const contentId = 'content_' + Date.now();
 
-  // Build streaming element
-  const searchBadge = usedSearch ? `<div class="search-indicator">🔍 Web Search aktif · sonar-pro</div>` : '';
   const wrap = document.createElement('div');
-  wrap.id = wrapId;
   wrap.className = 'msg-wrap ai-msg';
   wrap.innerHTML = `
     <div class="ai-avatar">${role.icon}</div>
     <div class="ai-body">
       <div class="ai-role-label">${role.label} · Nexus AI</div>
-      ${searchBadge}
       <div id="${contentId}" class="ai-content md-content"></div>
     </div>`;
   container.appendChild(wrap);
@@ -2291,35 +1223,26 @@ async function streamResponse(response, conv, usedSearch) {
             postProcessMessages(contentEl);
             scrollDown();
           }
-        } catch(e) { /* skip malformed chunk */ }
+        } catch(e) { /* skip malformed */ }
       }
     }
-  } catch(e) {
-    if (!fullText) throw e;
-  }
+  } catch(e) { if (!fullText) throw e; }
 
-  // Final render
   contentEl.innerHTML = renderMD(fullText);
   postProcessMessages(contentEl);
 
-  // Add actions
   const actionsDiv = document.createElement('div');
   actionsDiv.className = 'msg-actions';
   actionsDiv.innerHTML = `
     <button class="msg-action-btn" onclick="copyText(this,'${encodeURIComponent(fullText)}')">Salin</button>
-    <button class="msg-action-btn" onclick="regenerate(this)">Ulangi</button>
-  `;
+    <button class="msg-action-btn" onclick="regenerate(this)">Ulangi</button>`;
   wrap.querySelector('.ai-body').appendChild(actionsDiv);
 
-  // Save to conversation
-  conv.messages.push({ role: 'assistant', content: fullText, role_key: App.currentRole, used_search: usedSearch, ts: Date.now() });
-  save();
-  scrollDown();
+  conv.messages.push({ role: 'assistant', content: fullText, role_key: App.currentRole, ts: Date.now() });
+  save(); scrollDown();
 }
 
-// ═══════════════════════════════════════════════════════════════
-// SETTINGS
-// ═══════════════════════════════════════════════════════════════
+// ── SETTINGS ──
 function openSettings() {
   document.getElementById('key-fast').value = App.keys.fast || '';
   document.getElementById('key-deep').value = App.keys.deep || '';
@@ -2327,27 +1250,17 @@ function openSettings() {
   document.getElementById('settings-modal').classList.add('show');
   closeCmdPalette();
 }
-
-function closeSettings() {
-  document.getElementById('settings-modal').classList.remove('show');
-}
-
+function closeSettings() { document.getElementById('settings-modal').classList.remove('show'); }
 function saveSettings() {
   App.keys.fast = document.getElementById('key-fast').value.trim();
   App.keys.deep = document.getElementById('key-deep').value.trim();
-  save();
-  closeSettings();
-  toast('✓ Konfigurasi tersimpan');
+  save(); closeSettings(); toast('✓ Konfigurasi tersimpan');
 }
-
 function setDefaultMode(mode) {
-  App.defaultMode = mode;
-  App.mode = mode;
-  updateModeUI();
-  updateModelTag();
-  updateDefaultModeSelectors();
+  if (!MODELS[mode]) return;
+  App.defaultMode = mode; App.mode = mode;
+  updateModeUI(); updateModelTag(); updateDefaultModeSelectors();
 }
-
 function updateDefaultModeSelectors() {
   ['fast','deep'].forEach(m => {
     const btn = document.getElementById('sel-' + m + '-btn');
@@ -2355,13 +1268,10 @@ function updateDefaultModeSelectors() {
     if (App.defaultMode === m) btn.classList.add('sel-' + m);
   });
 }
-
 function clearAllData() {
   if (!confirm('Hapus semua percakapan dan reset Nexus AI?')) return;
-  localStorage.removeItem('nexus_v3');
-  location.reload();
+  localStorage.removeItem('nexus_v3'); location.reload();
 }
-
 function overlayClose(e, id) {
   if (e.target === document.getElementById(id)) {
     if (id === 'settings-modal') closeSettings();
@@ -2369,63 +1279,54 @@ function overlayClose(e, id) {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════
-// COMMAND PALETTE
-// ═══════════════════════════════════════════════════════════════
+// ── COMMAND PALETTE ──
 let filteredCmds = COMMANDS;
-
 function openCmdPalette() {
   document.getElementById('cmd-palette').classList.add('show');
   document.getElementById('cmd-input').value = '';
-  filteredCmds = COMMANDS;
-  renderCmds(COMMANDS);
+  filteredCmds = COMMANDS; renderCmds(COMMANDS);
   setTimeout(() => document.getElementById('cmd-input').focus(), 50);
 }
-
-function closeCmdPalette() {
-  document.getElementById('cmd-palette').classList.remove('show');
-}
-
+function closeCmdPalette() { document.getElementById('cmd-palette').classList.remove('show'); }
 function renderCmds(cmds) {
   document.getElementById('cmd-list').innerHTML = cmds.map((c, i) => `
     <button class="cmd-item" onclick="runCmd(${i})">
       <span class="cmd-item-icon">${c.icon}</span>
       <span class="cmd-item-label">${c.label}</span>
-    </button>
-  `).join('');
+    </button>`).join('');
 }
-
 function filterCmds(val) {
   filteredCmds = val ? COMMANDS.filter(c => c.label.toLowerCase().includes(val.toLowerCase())) : COMMANDS;
   renderCmds(filteredCmds);
 }
+function runCmd(i) { if (filteredCmds[i]) { filteredCmds[i].action(); closeCmdPalette(); } }
 
-function runCmd(i) {
-  if (filteredCmds[i]) { filteredCmds[i].action(); closeCmdPalette(); }
-}
-
-// ═══════════════════════════════════════════════════════════════
-// SIDEBAR RESIZE
-// ═══════════════════════════════════════════════════════════════
+// ── SIDEBAR RESIZE ──
 function startResize(e) {
   e.preventDefault();
   const sidebar = document.getElementById('sidebar');
-  const startX = e.clientX;
-  const startW = sidebar.offsetWidth;
+  const startX = e.clientX; const startW = sidebar.offsetWidth;
   const onMove = e => sidebar.style.width = Math.max(180, Math.min(400, startW + e.clientX - startX)) + 'px';
   const onUp = () => { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
-  document.addEventListener('mousemove', onMove);
-  document.addEventListener('mouseup', onUp);
+  document.addEventListener('mousemove', onMove); document.addEventListener('mouseup', onUp);
 }
 
-function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('show');
+}
+
 function closeSidebar() {
-  if (window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('open');
+  const isMobileOrTablet = window.innerWidth <= 1024;
+  if (isMobileOrTablet) {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebar-overlay').classList.remove('show');
+  }
 }
 
-// ═══════════════════════════════════════════════════════════════
-// THEME
-// ═══════════════════════════════════════════════════════════════
+// ── THEME ──
 function applyTheme() {
   if (App.theme === 'light') {
     document.body.classList.add('light');
@@ -2437,30 +1338,25 @@ function applyTheme() {
     document.getElementById('hljs-theme').href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css';
   }
 }
+function toggleTheme() { App.theme = App.theme === 'dark' ? 'light' : 'dark'; applyTheme(); save(); }
 
-function toggleTheme() {
-  App.theme = App.theme === 'dark' ? 'light' : 'dark';
-  applyTheme();
-  save();
-}
-
-// ═══════════════════════════════════════════════════════════════
-// TOAST
-// ═══════════════════════════════════════════════════════════════
+// ── TOAST ──
 function toast(msg, type = 'success') {
   const el = document.createElement('div');
-  el.className = `toast toast-${type}`;
-  el.textContent = msg;
+  el.className = `toast toast-${type}`; el.textContent = msg;
   document.body.appendChild(el);
   setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity 0.3s'; setTimeout(() => el.remove(), 350); }, 2800);
 }
 
-// ═══════════════════════════════════════════════════════════════
-// STORAGE
-// ═══════════════════════════════════════════════════════════════
+// ── STORAGE ──
 function save() {
-  try { localStorage.setItem('nexus_v3', JSON.stringify({ theme: App.theme, mode: App.mode, defaultMode: App.defaultMode, conversations: App.conversations, currentId: App.currentId, keys: App.keys, currentRole: App.currentRole })); }
-  catch(e) {}
+  try {
+    localStorage.setItem('nexus_v3', JSON.stringify({
+      theme: App.theme, mode: App.mode, defaultMode: App.defaultMode,
+      conversations: App.conversations, currentId: App.currentId,
+      keys: App.keys, currentRole: App.currentRole, webSearch: App.webSearch,
+    }));
+  } catch(e) {}
 }
 
 function load() {
@@ -2469,26 +1365,22 @@ function load() {
     if (raw) {
       const s = JSON.parse(raw);
       App.theme = s.theme || 'dark';
-      App.mode = s.mode || 'fast';
-      App.defaultMode = s.defaultMode || 'fast';
+      // ── FIX #5: Validate loaded mode — if invalid, reset to 'fast' ──
+      App.mode = MODELS[s.mode] ? s.mode : 'fast';
+      App.defaultMode = MODELS[s.defaultMode] ? s.defaultMode : 'fast';
       App.conversations = s.conversations || [];
       App.currentId = s.currentId || null;
-      App.keys = s.keys || { fast: '', deep: '', search: '' };
+      App.keys = s.keys || { fast: '', deep: '' };
       App.currentRole = s.currentRole || 'engineer';
+      App.webSearch = s.webSearch || false;
     }
   } catch(e) {}
 }
 
-// ═══════════════════════════════════════════════════════════════
-// UTILS
-// ═══════════════════════════════════════════════════════════════
 function esc(t) {
   return (t || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ═══════════════════════════════════════════════════════════════
-// MARKED CONFIG
-// ═══════════════════════════════════════════════════════════════
 function setupMarked() {
   marked.setOptions({
     highlight: (code, lang) => {
@@ -2497,23 +1389,23 @@ function setupMarked() {
       }
       return hljs.highlightAuto(code).value;
     },
-    breaks: true,
-    gfm: true,
+    breaks: true, gfm: true,
   });
 }
 
-// ═══════════════════════════════════════════════════════════════
-// MOBILE
-// ═══════════════════════════════════════════════════════════════
+// ── RESPONSIVE: show/hide hamburger ──
 function handleMobile() {
   const mobileBtn = document.getElementById('mobile-menu-btn');
-  if (window.innerWidth <= 768) mobileBtn.style.display = 'flex';
-  else mobileBtn.style.display = 'none';
+  const isSmall = window.innerWidth <= 1024;
+  mobileBtn.style.display = isSmall ? 'flex' : 'none';
+  if (!isSmall) {
+    // Desktop: reset sidebar to normal flow
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebar-overlay').classList.remove('show');
+  }
 }
 
-// ═══════════════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════════════
+// ── INIT ──
 document.addEventListener('DOMContentLoaded', () => {
   load();
   setupMarked();
@@ -2525,22 +1417,24 @@ document.addEventListener('DOMContentLoaded', () => {
   handleMobile();
   window.addEventListener('resize', handleMobile);
 
+  // Restore web search button state
+  if (App.webSearch) {
+    document.getElementById('search-toggle-btn').classList.add('active');
+  }
+
   if (App.currentId && getConv(App.currentId)) {
     loadConv(App.currentId);
   } else {
-    showWelcome();
-    setTitle('Percakapan baru');
+    showWelcome(); setTitle('Percakapan baru');
   }
 
   updateSuggestions();
 
-  // Global keyboard shortcuts
   document.addEventListener('keydown', e => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); openCmdPalette(); }
     if (e.key === 'Escape') { closeSettings(); closeCmdPalette(); }
   });
 
-  // Focus input
   setTimeout(() => document.getElementById('chat-input').focus(), 200);
 });
 </script>

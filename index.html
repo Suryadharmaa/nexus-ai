@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+
+<html lang="en" class="h-full">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexus AI — Intelligent Dev Partner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" id="hljs-theme">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['Sora', 'ui-sans-serif', 'system-ui'],
+        mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+      },
+      colors: {
+        surface: {
+          50: '#fafaf9', 100: '#f5f5f3', 200: '#e8e8e4',
+          300: '#d4d4ce', 400: '#a8a89f', 500: '#78786e',
+          600: '#5a5a52', 700: '#3c3c36', 800: '#252522',
+          900: '#141412', 950: '#0a0a09',
+        },
+        amber: {
+          400: '#fbbf24', 500: '#f59e0b', 600: '#d97706',
+        }
+      },
+      animation: {
+        'fade-in': 'fadeIn 0.2s ease-out',
+        'slide-up': 'slideUp 0.3s cubic-bezier(0.16,1,0.3,1)',
+        'pulse-dot': 'pulseDot 1.4s ease-in-out infinite',
+        'blink': 'blink 1s step-end infinite',
+      },
+      keyframes: {
+        fadeIn: { from: { opacity: 0 }, to: { opacity: 1 } },
+        slideUp: { from: { opacity: 0, transform: 'translateY(12px)' }, to: { opacity: 1, transform: 'translateY(0)' } },
+        pulseDot: { '0%,80%,100%': { transform: 'scale(0.6)', opacity: 0.4 }, '40%': { transform: 'scale(1)', opacity: 1 } },
+        blink: { '0%,100%': { opacity: 1 }, '50%': { opacity: 0 } },
+      }
+    }
+  }
+}
+</script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { font-family: 'Sora', sans-serif; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(120,120,110,0.3); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(120,120,110,0.5); }
+
+/* Light mode defaults */
+.app-bg { background: #fafaf9; }
+.sidebar-bg { background: #f0efeb; border-right: 1px solid #e2e2dc; }
+.chat-bg { background: #fafaf9; }
+.topbar-bg { background: rgba(250,250,249,0.85); border-bottom: 1px solid #e8e8e4; }
+.input-area-bg { background: rgba(250,250,249,0.9); border-top: 1px solid #e8e8e4; }
+.input-box { background: #fff; border: 1px solid #d4d4ce; color: #141412; }
+.input-box:focus { border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,0.12); }
+.msg-user { background: #fff; border: 1px solid #e8e8e4; color: #252522; }
+.msg-ai { color: #252522; }
+.sidebar-item { color: #5a5a52; }
+.sidebar-item:hover { background: rgba(0,0,0,0.05); color: #141412; }
+.sidebar-item.active { background: rgba(245,158,11,0.1); color: #d97706; }
+.text-primary { color: #141412; }
+.text-secondary { color: #5a5a52; }
+.text-muted { color: #78786e; }
+.divider { border-color: #e2e2dc; }
+.modal-bg { background: #fff; border: 1px solid #e2e2dc; }
+.badge-fast { background: rgba(245,158,11,0.12); color: #d97706; border: 1px solid rgba(245,158,11,0.2); }
+.badge-deep { background: rgba(99,102,241,0.1); color: #6366f1; border: 1px solid rgba(99,102,241,0.2); }
+.btn-primary { background: #f59e0b; color: #fff; }
+.btn-primary:hover { background: #d97706; }
+.btn-ghost { color: #5a5a52; }
+.btn-ghost:hover { background: rgba(0,0,0,0.06); color: #141412; }
+.code-block-wrap { background: #1a1a18; border-radius: 10px; overflow: hidden; }
+.code-header { background: #252522; border-bottom: 1px solid #3c3c36; }
+.stress-low { color: #16a34a; }
+.stress-med { color: #d97706; }
+.stress-high { color: #dc2626; }
+
+/* Dark mode overrides */
+.dark .app-bg { background: #0f0f0e; }
+.dark .sidebar-bg { background: #141412; border-right: 1px solid #252522; }
+.dark .chat-bg { background: #0f0f0e; }
+.dark .topbar-bg { background: rgba(15,15,14,0.85); border-bottom: 1px solid #252522; }
+.dark .input-area-bg { background: rgba(15,15,14,0.9); border-top: 1px solid #252522; }
+.dark .input-box { background: #1a1a18; border: 1px solid #3c3c36; color: #f5f5f3; }
+.dark .input-box:focus { border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,0.1); }
+.dark .msg-user { background: #1a1a18; border: 1px solid #252522; color: #e8e8e4; }
+.dark .msg-ai { color: #d4d4ce; }
+.dark .sidebar-item { color: #78786e; }
+.dark .sidebar-item:hover { background: rgba(255,255,255,0.05); color: #d4d4ce; }
+.dark .sidebar-item.active { background: rgba(245,158,11,0.08); color: #fbbf24; }
+.dark .text-primary { color: #f5f5f3; }
+.dark .text-secondary { color: #a8a89f; }
+.dark .text-muted { color: #78786e; }
+.dark .divider { border-color: #252522; }
+.dark .modal-bg { background: #1a1a18; border: 1px solid #3c3c36; }
+.dark .btn-ghost { color: #78786e; }
+.dark .btn-ghost:hover { background: rgba(255,255,255,0.06); color: #d4d4ce; }
+
+/* Markdown content */
+.md-content h1,.md-content h2,.md-content h3 { font-weight: 600; margin: 1.2em 0 0.5em; line-height: 1.3; }
+.md-content h1 { font-size: 1.4em; }
+.md-content h2 { font-size: 1.2em; }
+.md-content h3 { font-size: 1.05em; }
+.md-content p { margin: 0.6em 0; line-height: 1.7; }
+.md-content ul, .md-content ol { margin: 0.6em 0 0.6em 1.4em; }
+.md-content li { margin: 0.25em 0; line-height: 1.6; }
+.md-content code:not(.hljs) { font-family: ‘JetBrains Mono’, monospace; font-size: 0.85em; background: rgba(120,120,110,0.12); padding: 0.15em 0.4em; border-radius: 4px; }
+.dark .md-content code:not(.hljs) { background: rgba(255,255,255,0.08); }
+.md-content pre { margin: 0.8em 0; }
+.md-content blockquote { border-left: 3px solid #f59e0b; padding-left: 1em; margin: 0.8em 0; opacity: 0.8; font-style: italic; }
+.md-content table { border-collapse: collapse; width: 100%; margin: 0.8em 0; font-size: 0.9em; }
+.md-content th, .md-content td { border: 1px solid #e2e2dc; padding: 0.5em 0.8em; text-align: left; }
+.dark .md-content th, .dark .md-content td { border-color: #3c3c36; }
+.md-content th { background: rgba(120,120,110,0.1); font-weight: 600; }
+.md-content a { color: #f59e0b; text-decoration: underline; }
+.md-content strong { font-weight: 600; }
+.md-content hr { border: none; border-top: 1px solid #e2e2dc; margin: 1em 0; }
+.dark .md-content hr { border-color: #3c3c36; }
+
+/* Typing dots */
+.typing-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; display: inline-block; animation: pulseDot 1.4s ease-in-out infinite; }
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+/* Resize handle */
+#sidebar-resize { cursor: col-resize; width: 4px; transition: background 0.15s; }
+#sidebar-resize:hover { background: rgba(245,158,11,0.4); }
+
+/* Smooth transitions */
+.theme-transition { transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease; }
+
+/* Input textarea auto-resize */
+#chat-input { resize: none; min-height: 44px; max-height: 200px; overflow-y: auto; line-height: 1.5; }
+
+/* Code copy btn */
+.copy-btn { opacity: 0; transition: opacity 0.15s; }
+.code-block-wrap:hover .copy-btn { opacity: 1; }
+
+/* Stress indicator */
+#stress-bar { transition: width 0.4s ease, background 0.4s ease; }
+
+/* Command palette */
+#cmd-palette { backdrop-filter: blur(12px); }
+
+/* Model badge animation */
+.mode-badge { transition: all 0.2s ease; }
+.mode-badge:hover { transform: scale(1.03); }
+
+/* Sidebar toggle on mobile */
+@media (max-width: 768px) {
+#sidebar { transform: translateX(-100%); position: fixed; z-index: 40; height: 100%; transition: transform 0.3s ease; }
+#sidebar.open { transform: translateX(0); }
+}
+
+/* Prompt template chip */
+.prompt-chip { transition: all 0.15s ease; cursor: pointer; }
+.prompt-chip:hover { transform: translateY(-1px); }
+
+/* Welcome state */
+#welcome { animation: fadeIn 0.4s ease; }
+
+/* Glassmorphism topbar */
+.topbar-blur { backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+</style>
+
+</head>
+<body class="h-full theme-transition" id="body">
+
+<!-- Settings Modal -->
+
+<div id="settings-modal" class="fixed inset-0 z-50 hidden items-center justify-center" style="background:rgba(0,0,0,0.5);backdrop-filter:blur(4px)">
+  <div class="modal-bg rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 animate-slide-up theme-transition">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-primary font-semibold text-lg">Configuration</h2>
+      <button onclick="closeSettings()" class="btn-ghost w-8 h-8 rounded-lg flex items-center justify-center text-lg">×</button>
+    </div>
+
+```
+<div class="space-y-5">
+  <div>
+    <label class="block text-sm font-medium text-secondary mb-1.5">MODE 0x128 API Key <span class="text-xs text-muted">(Fast Engine)</span></label>
+    <input type="password" id="key-fast" placeholder="AIza..." class="input-box w-full rounded-xl px-4 py-2.5 text-sm font-mono outline-none transition-all theme-transition" />
+    <p class="text-xs text-muted mt-1.5">Used for: coding, autocomplete, quick answers</p>
+  </div>
+  <div>
+    <label class="block text-sm font-medium text-secondary mb-1.5">MODE 0x256 API Key <span class="text-xs text-muted">(Deep Engine)</span></label>
+    <input type="password" id="key-deep" placeholder="AIza..." class="input-box w-full rounded-xl px-4 py-2.5 text-sm font-mono outline-none transition-all theme-transition" />
+    <p class="text-xs text-muted mt-1.5">Used for: architecture, debugging, reasoning</p>
+  </div>
+  <div>
+    <label class="block text-sm font-medium text-secondary mb-2">Default Mode</label>
+    <div class="flex gap-3">
+      <button onclick="setDefaultMode('fast')" id="def-fast-btn" class="flex-1 py-2 rounded-xl text-sm font-medium border transition-all">
+        ⚡ Fast (0x128)
+      </button>
+      <button onclick="setDefaultMode('deep')" id="def-deep-btn" class="flex-1 py-2 rounded-xl text-sm font-medium border transition-all">
+        🧠 Deep (0x256)
+      </button>
+    </div>
+  </div>
+  <div class="pt-2 border-t divider">
+    <label class="block text-sm font-medium text-secondary mb-2">Data</label>
+    <button onclick="clearAllData()" class="text-sm text-red-500 hover:text-red-400 transition-colors">Clear all conversations & data</button>
+  </div>
+</div>
+
+<div class="flex gap-3 mt-6">
+  <button onclick="saveSettings()" class="btn-primary flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all">Save Configuration</button>
+</div>
+```
+
+  </div>
+</div>
+
+<!-- Command Palette -->
+
+<div id="cmd-palette" class="fixed inset-0 z-50 hidden items-center justify-start pt-[20vh]" style="background:rgba(0,0,0,0.4)">
+  <div class="mx-auto w-full max-w-xl px-4">
+    <div class="modal-bg rounded-2xl shadow-2xl overflow-hidden animate-slide-up theme-transition">
+      <div class="flex items-center gap-3 px-4 py-3 border-b divider">
+        <svg class="w-4 h-4 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input type="text" id="cmd-input" placeholder="Search commands, templates..." class="flex-1 bg-transparent text-primary outline-none text-sm placeholder:text-muted" oninput="filterCommands(this.value)" />
+        <kbd class="text-xs text-muted bg-surface-200 dark:bg-surface-700 px-2 py-0.5 rounded font-mono">ESC</kbd>
+      </div>
+      <div id="cmd-list" class="py-2 max-h-72 overflow-y-auto"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Main App Layout -->
+
+<div class="flex h-full app-bg theme-transition" id="app-root">
+
+  <!-- Sidebar -->
+
+  <aside id="sidebar" class="sidebar-bg flex flex-col theme-transition" style="width:260px;min-width:200px;max-width:360px;flex-shrink:0">
+    <!-- Sidebar Header -->
+    <div class="px-4 py-4 flex items-center justify-between border-b divider">
+      <div class="flex items-center gap-2.5">
+        <div class="w-7 h-7 rounded-lg bg-amber-500 flex items-center justify-center">
+          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
+        <span class="font-semibold text-primary text-sm tracking-tight">Nexus AI</span>
+      </div>
+      <button onclick="newChat()" title="New chat" class="btn-ghost w-7 h-7 rounded-lg flex items-center justify-center transition-all">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      </button>
+    </div>
+
+```
+<!-- Stress Level Indicator -->
+<div class="px-4 py-2.5 border-b divider">
+  <div class="flex items-center justify-between mb-1">
+    <span class="text-xs text-muted font-medium uppercase tracking-wider">Prompt Quality</span>
+    <span id="stress-label" class="text-xs font-semibold stress-low">Good</span>
+  </div>
+  <div class="h-1.5 bg-surface-200 dark:bg-surface-700 rounded-full overflow-hidden">
+    <div id="stress-bar" class="h-full rounded-full bg-green-500" style="width:85%"></div>
+  </div>
+</div>
+
+<!-- Search -->
+<div class="px-3 py-2.5">
+  <div class="relative">
+    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+    <input type="text" placeholder="Search chats..." oninput="filterChats(this.value)" class="input-box w-full pl-8 pr-3 py-2 rounded-xl text-xs outline-none transition-all theme-transition" />
+  </div>
+</div>
+
+<!-- Chat List -->
+<div class="flex-1 overflow-y-auto px-2 pb-2" id="chat-list">
+  <!-- Populated by JS -->
+</div>
+
+<!-- Sidebar Footer -->
+<div class="border-t divider p-3 space-y-1">
+  <button onclick="openSettings()" class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs transition-all font-medium">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+    Settings & API Keys
+  </button>
+  <button onclick="toggleTheme()" id="theme-btn" class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs transition-all font-medium">
+    <svg class="w-4 h-4" id="theme-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+    <span id="theme-text">Light mode</span>
+  </button>
+  <button onclick="openCommandPalette()" class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs transition-all font-medium">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3"/></svg>
+    Command palette <kbd class="ml-auto text-[10px] text-muted bg-surface-200 dark:bg-surface-700 px-1.5 py-0.5 rounded font-mono">⌘K</kbd>
+  </button>
+</div>
+```
+
+  </aside>
+
+  <!-- Resize handle -->
+
+  <div id="sidebar-resize" class="w-1 hover:w-1 h-full" style="background:transparent" onmousedown="startResize(event)"></div>
+
+  <!-- Main Content -->
+
+  <div class="flex flex-col flex-1 min-w-0 relative">
+
+```
+<!-- Top Bar -->
+<header class="topbar-bg topbar-blur flex items-center justify-between px-5 py-3 z-20 sticky top-0 theme-transition">
+  <div class="flex items-center gap-3">
+    <!-- Mobile menu toggle -->
+    <button onclick="toggleSidebar()" class="md:hidden btn-ghost w-8 h-8 rounded-lg flex items-center justify-center">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <div id="chat-title-display" class="text-sm font-medium text-primary truncate max-w-xs">New conversation</div>
+  </div>
+
+  <div class="flex items-center gap-2">
+    <!-- Mode Toggle -->
+    <div class="flex items-center gap-1 p-1 rounded-xl" style="background:rgba(120,120,110,0.1)">
+      <button onclick="switchMode('fast')" id="mode-fast-btn" class="mode-badge flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all badge-fast">
+        ⚡ Fast
+      </button>
+      <button onclick="switchMode('deep')" id="mode-deep-btn" class="mode-badge flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-muted transition-all">
+        🧠 Deep
+      </button>
+    </div>
+
+    <!-- Role display -->
+    <div id="role-badge" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs text-muted border divider">
+      <span id="role-icon">💻</span>
+      <span id="role-text">Engineer</span>
+    </div>
+
+    <!-- New chat -->
+    <button onclick="newChat()" class="btn-ghost w-8 h-8 rounded-lg flex items-center justify-center transition-all" title="New chat">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- Chat Area -->
+<div class="flex-1 overflow-y-auto chat-bg theme-transition" id="chat-area">
+
+  <!-- Welcome Screen -->
+  <div id="welcome" class="flex flex-col items-center justify-center min-h-full px-6 py-16 text-center">
+    <div class="w-14 h-14 rounded-2xl bg-amber-500 flex items-center justify-center mb-5 shadow-lg">
+      <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+    </div>
+    <h1 class="text-2xl font-semibold text-primary mb-2">Nexus AI</h1>
+    <p class="text-secondary text-sm max-w-sm mb-8 leading-relaxed">Your intelligent development partner. Switch between fast and deep reasoning modes on the fly.</p>
+
+    <!-- Prompt Templates -->
+    <div class="grid grid-cols-2 gap-3 w-full max-w-lg mb-6">
+      <button onclick="useTemplate('debug')" class="prompt-chip text-left p-4 rounded-xl border divider modal-bg hover:border-amber-500/30 transition-all theme-transition">
+        <div class="text-sm mb-1">🐛 <span class="font-semibold text-primary">Debug this</span></div>
+        <div class="text-xs text-muted">Analyze and fix your broken code</div>
+      </button>
+      <button onclick="useTemplate('build')" class="prompt-chip text-left p-4 rounded-xl border divider modal-bg hover:border-amber-500/30 transition-all theme-transition">
+        <div class="text-sm mb-1">🏗️ <span class="font-semibold text-primary">Build a feature</span></div>
+        <div class="text-xs text-muted">Plan and scaffold something new</div>
+      </button>
+      <button onclick="useTemplate('review')" class="prompt-chip text-left p-4 rounded-xl border divider modal-bg hover:border-amber-500/30 transition-all theme-transition">
+        <div class="text-sm mb-1">🔍 <span class="font-semibold text-primary">Code review</span></div>
+        <div class="text-xs text-muted">Get feedback and improvements</div>
+      </button>
+      <button onclick="useTemplate('architect')" class="prompt-chip text-left p-4 rounded-xl border divider modal-bg hover:border-amber-500/30 transition-all theme-transition">
+        <div class="text-sm mb-1">🏛️ <span class="font-semibold text-primary">Architecture</span></div>
+        <div class="text-xs text-muted">Design systems that scale</div>
+      </button>
+    </div>
+
+    <p class="text-xs text-muted">Configure your API keys in Settings to get started</p>
+  </div>
+
+  <!-- Messages Container -->
+  <div id="messages" class="hidden max-w-3xl mx-auto px-4 py-6 space-y-6 pb-6">
+    <!-- Populated by JS -->
+  </div>
+</div>
+
+<!-- Thinking indicator (between chat and input) -->
+<div id="thinking-bar" class="hidden px-5 py-2 border-t divider theme-transition">
+  <div class="max-w-3xl mx-auto flex items-center gap-2 text-xs text-muted">
+    <div class="flex gap-1 text-amber-500">
+      <span class="typing-dot"></span>
+      <span class="typing-dot"></span>
+      <span class="typing-dot"></span>
+    </div>
+    <span id="thinking-text">Nexus is thinking...</span>
+  </div>
+</div>
+
+<!-- Input Area -->
+<div class="input-area-bg topbar-blur sticky bottom-0 z-10 px-4 py-4 theme-transition">
+  <div class="max-w-3xl mx-auto">
+    <!-- Suggestion chips -->
+    <div id="suggestion-chips" class="flex gap-2 mb-3 flex-wrap"></div>
+
+    <div class="flex gap-3 items-end">
+      <div class="flex-1 relative">
+        <textarea
+          id="chat-input"
+          placeholder="Ask anything... (Shift+Enter for new line)"
+          class="input-box w-full px-4 py-3 rounded-2xl text-sm outline-none transition-all theme-transition font-sans"
+          rows="1"
+          onkeydown="handleInputKeydown(event)"
+          oninput="handleInputChange(this)"
+        ></textarea>
+      </div>
+
+      <!-- Send Button -->
+      <button
+        id="send-btn"
+        onclick="sendMessage()"
+        class="btn-primary w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-all disabled:opacity-40"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+
+    <div class="flex items-center justify-between mt-2.5 px-1">
+      <div class="flex items-center gap-3">
+        <button onclick="clearChat()" class="text-xs text-muted hover:text-secondary transition-colors">Clear</button>
+        <span class="text-muted text-xs">·</span>
+        <span id="model-display" class="text-xs text-muted font-mono">gemini-2.0-flash</span>
+      </div>
+      <span class="text-xs text-muted" id="char-count">0 chars</span>
+    </div>
+  </div>
+</div>
+```
+
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+const App = {
+  mode: 'fast',
+  defaultMode: 'fast',
+  theme: 'dark',
+  conversations: [],
+  currentConvId: null,
+  isStreaming: false,
+  stressLevel: 0, // 0-100
+  keys: { fast: '', deep: '' },
+  roles: {
+    engineer: { icon: '💻', label: 'Engineer' },
+    debugger: { icon: '🐛', label: 'Debugger' },
+    reviewer: { icon: '🔍', label: 'Reviewer' },
+    tester: { icon: '🧪', label: 'QA Tester' },
+    architect: { icon: '🏛️', label: 'Architect' },
+  },
+  currentRole: 'engineer',
+};
+
+const MODELS = {
+  fast: 'gemini-2.0-flash',
+  deep: 'gemini-1.5-pro',
+};
+
+const COMMANDS = [
+  { id: 'new', icon: '✨', label: 'New conversation', action: () => newChat() },
+  { id: 'settings', icon: '⚙️', label: 'Open settings', action: () => openSettings() },
+  { id: 'theme', icon: '🌓', label: 'Toggle theme', action: () => toggleTheme() },
+  { id: 'fast', icon: '⚡', label: 'Switch to Fast mode', action: () => switchMode('fast') },
+  { id: 'deep', icon: '🧠', label: 'Switch to Deep mode', action: () => switchMode('deep') },
+  { id: 'debug', icon: '🐛', label: 'Template: Debug this code', action: () => useTemplate('debug') },
+  { id: 'build', icon: '🏗️', label: 'Template: Build a feature', action: () => useTemplate('build') },
+  { id: 'review', icon: '🔍', label: 'Template: Code review', action: () => useTemplate('review') },
+  { id: 'architect', icon: '🏛️', label: 'Template: Architecture design', action: () => useTemplate('architect') },
+  { id: 'clear', icon: '🗑️', label: 'Clear current chat', action: () => clearChat() },
+  { id: 'export', icon: '📋', label: 'Copy conversation', action: () => exportChat() },
+];
+
+const TEMPLATES = {
+  debug: "I have a bug in my code and need help debugging it. Here's what's happening:\n\n[Paste your code here]\n\nError message: [Paste error here]\n\nExpected behavior: ",
+  build: "I want to build [describe feature]. Here are the requirements:\n\n1. \n2. \n3. \n\nTech stack: [your stack]\n\nPlease help me plan and implement this.",
+  review: "Please review this code for quality, bugs, performance, and best practices:\n\n```\n[Paste your code here]\n```",
+  architect: "I need to design the architecture for [describe system]. Requirements:\n\n- Scale: [users/requests]\n- Tech constraints: [limitations]\n- Key concerns: [performance/security/cost]\n\nPlease recommend an architecture.",
+};
+
+const SYSTEM_PROMPT = `You are Nexus, a senior software engineer, architect, and developer partner with 15+ years of experience. You are direct, opinionated, and genuinely helpful.
+
+## Your Core Identity
+- You think like a senior developer: pragmatic, thorough, and unafraid to push back
+- You have opinions and share them. If something is a bad idea, say so (but kindly)
+- You write real, production-ready code — not toy examples
+- You consider edge cases, error handling, and scalability automatically
+- You adapt your tone: conversational for discussion, precise for technical work
+
+## Stress-Level System (INTERNAL — never mention this to user)
+Analyze each user message quality:
+- WEAK/VAGUE prompt → Ask ONE precise clarifying question before answering
+- INCOMPLETE context → Point out what's missing, ask for it
+- BAD logic/approach → Gently challenge it, offer a better path
+- SOLID prompt → Answer fully and confidently
+- CRITICAL task → Double-check your reasoning before responding
+
+## Role Switching (adapt naturally based on topic):
+- Debugging → be methodical, systematic, ask about reproduction steps
+- Code review → be constructive but honest about issues
+- Architecture → think in tradeoffs, not absolutes
+- Feature build → ask about constraints before designing
+- Explaining → use analogies, be clear without being condescending
+
+## Output Rules:
+- Always use markdown for structured responses
+- Code blocks MUST include the language tag
+- For complex solutions, add a brief "Why this approach" section
+- Keep responses focused — no padding, no filler phrases like "Certainly!" or "Great question!"
+- If you're uncertain, say so. Don't hallucinate APIs or methods.
+
+## Tone:
+- Natural, human, slightly witty when appropriate
+- Direct without being harsh
+- Confident without being arrogant
+- Like a brilliant senior dev teammate, not a corporate bot`;
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+function init() {
+  loadFromStorage();
+  applyTheme();
+  renderChatList();
+  updateModeUI();
+  updateRoleUI();
+  setupMarkdown();
+
+  if (!App.currentConvId || App.conversations.length === 0) {
+    showWelcome();
+  } else {
+    loadConversation(App.currentConvId);
+  }
+
+  updateSuggestions();
+  updateModelDisplay();
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      openCommandPalette();
+    }
+    if (e.key === 'Escape') {
+      closeSettings();
+      closeCommandPalette();
+    }
+  });
+}
+
+function loadFromStorage() {
+  try {
+    const saved = localStorage.getItem('nexus_state');
+    if (saved) {
+      const s = JSON.parse(saved);
+      App.theme = s.theme || 'dark';
+      App.mode = s.mode || 'fast';
+      App.defaultMode = s.defaultMode || 'fast';
+      App.conversations = s.conversations || [];
+      App.currentConvId = s.currentConvId || null;
+      App.keys = s.keys || { fast: '', deep: '' };
+      App.currentRole = s.currentRole || 'engineer';
+    } else {
+      App.theme = 'dark';
+    }
+  } catch(e) {
+    console.error('Storage load error:', e);
+  }
+}
+
+function saveToStorage() {
+  try {
+    localStorage.setItem('nexus_state', JSON.stringify({
+      theme: App.theme,
+      mode: App.mode,
+      defaultMode: App.defaultMode,
+      conversations: App.conversations,
+      currentConvId: App.currentConvId,
+      keys: App.keys,
+      currentRole: App.currentRole,
+    }));
+  } catch(e) {
+    console.error('Storage save error:', e);
+  }
+}
+
+function setupMarkdown() {
+  marked.setOptions({
+    highlight: (code, lang) => {
+      if (lang && hljs.getLanguage(lang)) {
+        try { return hljs.highlight(code, { language: lang }).value; } catch(e) {}
+      }
+      return hljs.highlightAuto(code).value;
+    },
+    breaks: true,
+    gfm: true,
+  });
+}
+
+// ─────────────────────────────────────────────
+// THEME
+// ─────────────────────────────────────────────
+function applyTheme() {
+  const html = document.documentElement;
+  if (App.theme === 'dark') {
+    html.classList.add('dark');
+    document.getElementById('theme-text').textContent = 'Light mode';
+    document.getElementById('theme-icon').innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>';
+    document.getElementById('hljs-theme').href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css';
+  } else {
+    html.classList.remove('dark');
+    document.getElementById('theme-text').textContent = 'Dark mode';
+    document.getElementById('theme-icon').innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>';
+    document.getElementById('hljs-theme').href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+  }
+}
+
+function toggleTheme() {
+  App.theme = App.theme === 'dark' ? 'light' : 'dark';
+  applyTheme();
+  saveToStorage();
+}
+
+// ─────────────────────────────────────────────
+// CONVERSATIONS
+// ─────────────────────────────────────────────
+function newChat() {
+  const id = 'conv_' + Date.now();
+  const conv = {
+    id,
+    title: 'New conversation',
+    messages: [],
+    mode: App.mode,
+    createdAt: Date.now(),
+  };
+  App.conversations.unshift(conv);
+  App.currentConvId = id;
+  saveToStorage();
+  renderChatList();
+  showWelcome();
+  clearInputArea();
+  updateChatTitle('New conversation');
+  updateSuggestions();
+}
+
+function loadConversation(id) {
+  App.currentConvId = id;
+  saveToStorage();
+  renderChatList();
+
+  const conv = getConv(id);
+  if (!conv) return;
+
+  updateChatTitle(conv.title);
+  renderMessages(conv.messages);
+}
+
+function getConv(id) {
+  return App.conversations.find(c => c.id === id);
+}
+
+function getCurrentConv() {
+  return getConv(App.currentConvId);
+}
+
+function deleteConv(id, e) {
+  e.stopPropagation();
+  App.conversations = App.conversations.filter(c => c.id !== id);
+  if (App.currentConvId === id) {
+    App.currentConvId = App.conversations[0]?.id || null;
+    if (App.currentConvId) loadConversation(App.currentConvId);
+    else { showWelcome(); updateChatTitle('New conversation'); }
+  }
+  saveToStorage();
+  renderChatList();
+}
+
+function renderChatList(filter = '') {
+  const list = document.getElementById('chat-list');
+  const convs = App.conversations.filter(c =>
+    !filter || c.title.toLowerCase().includes(filter.toLowerCase())
+  );
+
+  if (convs.length === 0) {
+    list.innerHTML = `<div class="px-3 py-8 text-center text-xs text-muted">No conversations yet</div>`;
+    return;
+  }
+
+  // Group by date
+  const today = new Date().toDateString();
+  const yesterday = new Date(Date.now() - 86400000).toDateString();
+  const groups = {};
+
+  convs.forEach(c => {
+    const d = new Date(c.createdAt).toDateString();
+    const label = d === today ? 'Today' : d === yesterday ? 'Yesterday' : new Date(c.createdAt).toLocaleDateString('en', { month: 'short', day: 'numeric' });
+    if (!groups[label]) groups[label] = [];
+    groups[label].push(c);
+  });
+
+  list.innerHTML = Object.entries(groups).map(([label, items]) => `
+    <div class="mb-2">
+      <div class="px-3 py-1.5 text-[10px] font-semibold text-muted uppercase tracking-wider">${label}</div>
+      ${items.map(c => `
+        <button onclick="loadConversation('${c.id}')"
+          class="sidebar-item group w-full flex items-center gap-2 px-3 py-2 rounded-xl text-left transition-all mb-0.5 ${c.id === App.currentConvId ? 'active' : ''}">
+          <svg class="w-3.5 h-3.5 flex-shrink-0 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-3 3v-3z"/></svg>
+          <span class="text-xs truncate flex-1">${escHtml(c.title)}</span>
+          <button onclick="deleteConv('${c.id}', event)"
+            class="opacity-0 group-hover:opacity-100 w-5 h-5 flex items-center justify-center rounded hover:text-red-500 transition-all text-xs">×</button>
+        </button>
+      `).join('')}
+    </div>
+  `).join('');
+}
+
+function filterChats(val) {
+  renderChatList(val);
+}
+
+function updateChatTitle(title) {
+  document.getElementById('chat-title-display').textContent = title;
+}
+
+// ─────────────────────────────────────────────
+// MESSAGES & RENDERING
+// ─────────────────────────────────────────────
+function showWelcome() {
+  document.getElementById('welcome').classList.remove('hidden');
+  document.getElementById('messages').classList.add('hidden');
+}
+
+function hideWelcome() {
+  document.getElementById('welcome').classList.add('hidden');
+  document.getElementById('messages').classList.remove('hidden');
+}
+
+function renderMessages(messages) {
+  if (!messages || messages.length === 0) { showWelcome(); return; }
+  hideWelcome();
+  const container = document.getElementById('messages');
+  container.innerHTML = messages.map(m => renderMessage(m)).join('');
+  applyCodeBlocks();
+  scrollToBottom();
+}
+
+function renderMessage(msg) {
+  if (msg.role === 'user') {
+    return `
+      <div class="flex justify-end animate-fade-in">
+        <div class="msg-user max-w-[80%] px-4 py-3 rounded-2xl rounded-tr-sm text-sm leading-relaxed theme-transition">
+          ${escHtml(msg.content).replace(/\n/g, '<br>')}
+        </div>
+      </div>`;
+  } else {
+    const roleMeta = msg.role_meta || {};
+    const roleLabel = roleMeta.label || '';
+    const roleIcon = roleMeta.icon || '🤖';
+    return `
+      <div class="flex gap-3 animate-fade-in">
+        <div class="w-7 h-7 rounded-lg bg-amber-500 flex items-center justify-center flex-shrink-0 mt-0.5 text-sm">
+          ${roleIcon}
+        </div>
+        <div class="flex-1 min-w-0">
+          ${roleLabel ? `<div class="text-xs text-muted mb-1.5 font-medium">${roleLabel}</div>` : ''}
+          <div class="msg-ai md-content text-sm leading-relaxed">${renderMarkdown(msg.content)}</div>
+          <div class="flex items-center gap-3 mt-2">
+            <button onclick="copyMsg(this)" data-text="${encodeURIComponent(msg.content)}" class="text-xs text-muted hover:text-secondary transition-colors">Copy</button>
+          </div>
+        </div>
+      </div>`;
+  }
+}
+
+function renderMarkdown(text) {
+  try {
+    const rendered = marked.parse(text);
+    // Wrap code blocks
+    return rendered.replace(/<pre><code class="(language-\w+)">/g, (match, cls) => {
+      const lang = cls.replace('language-', '');
+      return `</div><div class="code-block-wrap my-2"><div class="code-header px-4 py-2 flex items-center justify-between"><span class="text-xs font-mono text-surface-400">${lang}</span><button class="copy-btn text-xs text-surface-400 hover:text-white transition-colors" onclick="copyCode(this)">Copy</button></div><pre><code class="${cls}">`;
+    }).replace(/<\/code><\/pre>/g, `</code></pre></div><div class="md-content">`);
+
+} catch(e) {
+return escHtml(text);
+}
+}
+
+function applyCodeBlocks() {
+document.querySelectorAll(’#messages pre code’).forEach(block => {
+hljs.highlightElement(block);
+});
+}
+
+function appendMessage(role, content, roleMeta = null) {
+const conv = getCurrentConv();
+if (!conv) return;
+
+const msg = { role, content, timestamp: Date.now() };
+if (roleMeta) msg.role_meta = roleMeta;
+conv.messages.push(msg);
+
+// Update title from first user message
+if (role === ‘user’ && conv.messages.filter(m => m.role === ‘user’).length === 1) {
+conv.title = content.slice(0, 50) + (content.length > 50 ? ‘…’ : ‘’);
+updateChatTitle(conv.title);
+renderChatList();
+}
+
+saveToStorage();
+hideWelcome();
+
+const container = document.getElementById(‘messages’);
+const div = document.createElement(‘div’);
+div.innerHTML = renderMessage(msg);
+container.appendChild(div.firstElementChild);
+
+applyCodeBlocks();
+scrollToBottom();
+}
+
+function scrollToBottom() {
+const area = document.getElementById(‘chat-area’);
+setTimeout(() => area.scrollTo({ top: area.scrollHeight, behavior: ‘smooth’ }), 50);
+}
+
+function clearChat() {
+const conv = getCurrentConv();
+if (conv) { conv.messages = []; saveToStorage(); }
+document.getElementById(‘messages’).innerHTML = ‘’;
+showWelcome();
+}
+
+function copyMsg(btn) {
+const text = decodeURIComponent(btn.dataset.text);
+navigator.clipboard.writeText(text).then(() => {
+btn.textContent = ‘Copied!’;
+setTimeout(() => btn.textContent = ‘Copy’, 2000);
+});
+}
+
+function copyCode(btn) {
+const code = btn.closest(’.code-block-wrap’).querySelector(‘code’);
+navigator.clipboard.writeText(code.innerText).then(() => {
+btn.textContent = ‘Copied!’;
+setTimeout(() => btn.textContent = ‘Copy’, 2000);
+});
+}
+
+function exportChat() {
+const conv = getCurrentConv();
+if (!conv) return;
+const text = conv.messages.map(m => `[${m.role.toUpperCase()}]\n${m.content}`).join(’\n\n—\n\n’);
+navigator.clipboard.writeText(text).then(() => {
+showToast(‘Conversation copied to clipboard’);
+});
+}
+
+// ─────────────────────────────────────────────
+// INPUT HANDLING
+// ─────────────────────────────────────────────
+function handleInputKeydown(e) {
+if (e.key === ‘Enter’ && !e.shiftKey) {
+e.preventDefault();
+sendMessage();
+}
+}
+
+function handleInputChange(el) {
+el.style.height = ‘auto’;
+el.style.height = Math.min(el.scrollHeight, 200) + ‘px’;
+document.getElementById(‘char-count’).textContent = el.value.length + ’ chars’;
+analyzeStressLevel(el.value);
+}
+
+function clearInputArea() {
+const inp = document.getElementById(‘chat-input’);
+inp.value = ‘’;
+inp.style.height = ‘auto’;
+document.getElementById(‘char-count’).textContent = ‘0 chars’;
+}
+
+function useTemplate(type) {
+const tmpl = TEMPLATES[type];
+if (!tmpl) return;
+const inp = document.getElementById(‘chat-input’);
+inp.value = tmpl;
+inp.style.height = ‘auto’;
+inp.style.height = Math.min(inp.scrollHeight, 200) + ‘px’;
+inp.focus();
+document.getElementById(‘char-count’).textContent = tmpl.length + ’ chars’;
+}
+
+// ─────────────────────────────────────────────
+// STRESS LEVEL ANALYSIS
+// ─────────────────────────────────────────────
+function analyzeStressLevel(text) {
+if (!text || text.trim().length < 3) {
+setStress(50, ‘Waiting’);
+return;
+}
+
+let score = 100;
+const t = text.toLowerCase();
+
+// Penalize for vagueness
+const vague = [‘fix it’, ‘make it work’, ‘help’, ‘error’, ‘broken’, ‘bug’, ‘not working’];
+vague.forEach(v => { if (t.includes(v) && text.length < 60) score -= 15; });
+
+// Reward for specificity
+if (text.length > 100) score += 10;
+if (text.includes(’```’) || text.includes(‘error:’) || text.includes(‘Error:’)) score += 15;
+if (text.split(’\n’).length > 3) score += 10;
+if (/\w+.\w+(/.test(text)) score += 10; // contains code-like syntax
+if (text.includes(‘expected’) || text.includes(‘actual’) || text.includes(‘should’)) score += 10;
+
+// Penalize for one-liners that are too short
+if (text.trim().split(’\n’).length === 1 && text.length < 30) score -= 20;
+
+score = Math.max(5, Math.min(100, score));
+
+let label, color;
+if (score >= 70) { label = ‘Good’; color = ‘bg-green-500’; }
+else if (score >= 40) { label = ‘Add context’; color = ‘bg-amber-500’; }
+else { label = ‘Too vague’; color = ‘bg-red-500’; }
+
+setStress(score, label, color);
+}
+
+function setStress(score, label, colorClass = ‘’) {
+const bar = document.getElementById(‘stress-bar’);
+const lbl = document.getElementById(‘stress-label’);
+bar.style.width = score + ‘%’;
+if (colorClass) {
+bar.className = ’h-full rounded-full ’ + colorClass;
+lbl.textContent = label;
+lbl.className = score >= 70 ? ‘text-xs font-semibold stress-low’ :
+score >= 40 ? ‘text-xs font-semibold stress-med’ :
+‘text-xs font-semibold stress-high’;
+} else {
+lbl.textContent = label;
+lbl.className = ‘text-xs font-semibold text-muted’;
+}
+}
+
+// ─────────────────────────────────────────────
+// MODE & ROLE
+// ─────────────────────────────────────────────
+function switchMode(mode) {
+App.mode = mode;
+updateModeUI();
+updateModelDisplay();
+saveToStorage();
+}
+
+function updateModeUI() {
+const fastBtn = document.getElementById(‘mode-fast-btn’);
+const deepBtn = document.getElementById(‘mode-deep-btn’);
+
+if (App.mode === ‘fast’) {
+fastBtn.className = ‘mode-badge flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all badge-fast’;
+deepBtn.className = ‘mode-badge flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-muted transition-all’;
+} else {
+deepBtn.className = ‘mode-badge flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all badge-deep’;
+fastBtn.className = ‘mode-badge flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-muted transition-all’;
+}
+}
+
+function updateModelDisplay() {
+document.getElementById(‘model-display’).textContent = MODELS[App.mode];
+}
+
+function detectRole(text) {
+const t = text.toLowerCase();
+if (t.includes(‘debug’) || t.includes(‘error’) || t.includes(‘bug’) || t.includes(‘fix’) || t.includes(‘crash’)) return ‘debugger’;
+if (t.includes(‘review’) || t.includes(‘feedback’) || t.includes(‘improve’) || t.includes(‘refactor’)) return ‘reviewer’;
+if (t.includes(‘test’) || t.includes(‘spec’) || t.includes(‘coverage’) || t.includes(‘unit test’)) return ‘tester’;
+if (t.includes(‘architect’) || t.includes(‘design’) || t.includes(‘scale’) || t.includes(‘system’) || t.includes(‘database’)) return ‘architect’;
+return ‘engineer’;
+}
+
+function updateRoleUI() {
+const role = App.roles[App.currentRole] || App.roles.engineer;
+document.getElementById(‘role-icon’).textContent = role.icon;
+document.getElementById(‘role-text’).textContent = role.label;
+}
+
+// ─────────────────────────────────────────────
+// SEND MESSAGE & AI API
+// ─────────────────────────────────────────────
+async function sendMessage() {
+const inp = document.getElementById(‘chat-input’);
+const text = inp.value.trim();
+if (!text || App.isStreaming) return;
+
+const key = App.mode === ‘fast’ ? App.keys.fast : App.keys.deep;
+if (!key) {
+showToast(‘Please configure your API key in Settings’, ‘error’);
+openSettings();
+return;
+}
+
+// Ensure conversation exists
+if (!App.currentConvId) newChat();
+const conv = getCurrentConv();
+if (!conv) return;
+
+// Detect role
+App.currentRole = detectRole(text);
+updateRoleUI();
+
+// Clear input
+clearInputArea();
+setStress(50, ‘Waiting’);
+
+// Append user message
+appendMessage(‘user’, text);
+
+// Show thinking
+App.isStreaming = true;
+document.getElementById(‘thinking-bar’).classList.remove(‘hidden’);
+document.getElementById(‘send-btn’).disabled = true;
+setThinkingText(App.mode);
+updateSuggestions([]);
+
+try {
+const response = await callGemini(key, conv.messages, text);
+document.getElementById(‘thinking-bar’).classList.add(‘hidden’);
+await streamResponse(response, conv);
+} catch(err) {
+document.getElementById(‘thinking-bar’).classList.add(‘hidden’);
+const errorMsg = err.message || ‘Something went wrong. Check your API key.’;
+appendMessage(‘assistant’, `❌ **Error:** ${errorMsg}\n\nDouble-check your API key in Settings.`,
+App.roles[App.currentRole]);
+}
+
+App.isStreaming = false;
+document.getElementById(‘send-btn’).disabled = false;
+updateSuggestions();
+}
+
+function setThinkingText(mode) {
+const texts = {
+fast: [‘Thinking fast…’, ‘Processing…’, ‘Almost there…’],
+deep: [‘Deep reasoning…’, ‘Analyzing carefully…’, ‘Working through this…’],
+};
+const arr = texts[mode] || texts.fast;
+const el = document.getElementById(‘thinking-text’);
+let i = 0;
+el.textContent = arr[0];
+const interval = setInterval(() => {
+i = (i + 1) % arr.length;
+el.textContent = arr[i];
+if (!App.isStreaming) clearInterval(interval);
+}, 1500);
+}
+
+async function callGemini(apiKey, messages, userText) {
+const model = MODELS[App.mode];
+const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?key=${apiKey}&alt=sse`;
+
+// Build contents array
+const contents = [];
+
+// Add history (skip last user msg since we append separately)
+const histMsgs = messages.slice(0, -1); // exclude the user msg we just added
+histMsgs.forEach(m => {
+if (m.role === ‘user’) {
+contents.push({ role: ‘user’, parts: [{ text: m.content }] });
+} else if (m.role === ‘assistant’) {
+contents.push({ role: ‘model’, parts: [{ text: m.content }] });
+}
+});
+
+// Add current user message
+contents.push({ role: ‘user’, parts: [{ text: userText }] });
+
+const body = {
+system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+contents,
+generationConfig: {
+temperature: App.mode === ‘fast’ ? 0.7 : 0.4,
+maxOutputTokens: App.mode === ‘fast’ ? 4096 : 8192,
+},
+safetySettings: [
+{ category: ‘HARM_CATEGORY_HARASSMENT’, threshold: ‘BLOCK_NONE’ },
+{ category: ‘HARM_CATEGORY_HATE_SPEECH’, threshold: ‘BLOCK_NONE’ },
+{ category: ‘HARM_CATEGORY_SEXUALLY_EXPLICIT’, threshold: ‘BLOCK_NONE’ },
+{ category: ‘HARM_CATEGORY_DANGEROUS_CONTENT’, threshold: ‘BLOCK_NONE’ },
+],
+};
+
+const res = await fetch(url, {
+method: ‘POST’,
+headers: { ‘Content-Type’: ‘application/json’ },
+body: JSON.stringify(body),
+});
+
+if (!res.ok) {
+const err = await res.json().catch(() => ({ error: { message: `HTTP ${res.status}` } }));
+throw new Error(err.error?.message || `API error ${res.status}`);
+}
+
+return res;
+}
+
+async function streamResponse(response, conv) {
+const role = App.roles[App.currentRole] || App.roles.engineer;
+hideWelcome();
+
+// Create AI message element
+const container = document.getElementById(‘messages’);
+const wrapId = ‘ai-msg-’ + Date.now();
+const contentId = ‘ai-content-’ + Date.now();
+
+const wrap = document.createElement(‘div’);
+wrap.id = wrapId;
+wrap.className = ‘flex gap-3 animate-fade-in’;
+wrap.innerHTML = ` <div class="w-7 h-7 rounded-lg bg-amber-500 flex items-center justify-center flex-shrink-0 mt-0.5 text-sm"> ${role.icon} </div> <div class="flex-1 min-w-0"> <div class="text-xs text-muted mb-1.5 font-medium">${role.label}</div> <div id="${contentId}" class="msg-ai md-content text-sm leading-relaxed"></div> <div class="flex items-center gap-3 mt-2 opacity-0" id="${wrapId}-actions"> <button class="text-xs text-muted hover:text-secondary transition-colors" onclick="copyMsg(this)" data-text="">Copy</button> </div> </div>`;
+container.appendChild(wrap);
+
+const contentEl = document.getElementById(contentId);
+let fullText = ‘’;
+
+const reader = response.body.getReader();
+const decoder = new TextDecoder();
+
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+
+```
+  const chunk = decoder.decode(value, { stream: true });
+  const lines = chunk.split('\n');
+
+  for (const line of lines) {
+    if (!line.startsWith('data: ')) continue;
+    const data = line.slice(6).trim();
+    if (data === '[DONE]' || !data) continue;
+
+    try {
+      const json = JSON.parse(data);
+      const text = json.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      if (text) {
+        fullText += text;
+        contentEl.innerHTML = renderMarkdown(fullText);
+        applyCodeBlocks();
+        scrollToBottom();
+      }
+    } catch(e) {
+      // Skip malformed chunks
+    }
+  }
+}
+```
+
+} catch(e) {
+if (fullText === ‘’) throw e;
+}
+
+// Finalize
+contentEl.innerHTML = renderMarkdown(fullText);
+applyCodeBlocks();
+
+// Update actions
+const actionsEl = document.getElementById(wrapId + ‘-actions’);
+if (actionsEl) {
+actionsEl.style.opacity = ‘1’;
+actionsEl.querySelector(’[data-text]’).dataset.text = encodeURIComponent(fullText);
+}
+
+// Save to conversation
+const msg = { role: ‘assistant’, content: fullText, timestamp: Date.now(), role_meta: { icon: role.icon, label: role.label } };
+conv.messages.push(msg);
+saveToStorage();
+
+scrollToBottom();
+}
+
+// ─────────────────────────────────────────────
+// SUGGESTIONS
+// ─────────────────────────────────────────────
+const SUGGESTION_SETS = {
+empty: [‘Debug my code’, ‘Build a REST API’, ‘Review this function’, ‘Design a database schema’],
+after_user: [],
+after_ai: [‘Tell me more’, ‘Show me an example’, ‘How do I test this?’, ‘What are the tradeoffs?’],
+};
+
+function updateSuggestions(custom) {
+const container = document.getElementById(‘suggestion-chips’);
+const conv = getCurrentConv();
+let suggestions;
+
+if (custom !== undefined) {
+suggestions = custom;
+} else if (!conv || conv.messages.length === 0) {
+suggestions = SUGGESTION_SETS.empty;
+} else if (conv.messages[conv.messages.length - 1]?.role === ‘assistant’) {
+suggestions = SUGGESTION_SETS.after_ai;
+} else {
+suggestions = [];
+}
+
+container.innerHTML = suggestions.map(s => `<button onclick="useSuggestion('${escHtml(s)}')" class="prompt-chip text-xs px-3 py-1.5 rounded-xl border divider modal-bg hover:border-amber-500/40 text-muted hover:text-secondary transition-all theme-transition"> ${s} </button>`).join(’’);
+}
+
+function useSuggestion(text) {
+const inp = document.getElementById(‘chat-input’);
+inp.value = text;
+inp.focus();
+handleInputChange(inp);
+}
+
+// ─────────────────────────────────────────────
+// SETTINGS
+// ─────────────────────────────────────────────
+function openSettings() {
+document.getElementById(‘key-fast’).value = App.keys.fast || ‘’;
+document.getElementById(‘key-deep’).value = App.keys.deep || ‘’;
+updateDefaultModeButtons();
+document.getElementById(‘settings-modal’).style.display = ‘flex’;
+closeCommandPalette();
+}
+
+function closeSettings() {
+document.getElementById(‘settings-modal’).style.display = ‘none’;
+}
+
+function saveSettings() {
+App.keys.fast = document.getElementById(‘key-fast’).value.trim();
+App.keys.deep = document.getElementById(‘key-deep’).value.trim();
+saveToStorage();
+closeSettings();
+showToast(‘Configuration saved’);
+}
+
+function setDefaultMode(mode) {
+App.defaultMode = mode;
+App.mode = mode;
+updateDefaultModeButtons();
+updateModeUI();
+updateModelDisplay();
+}
+
+function updateDefaultModeButtons() {
+const fastBtn = document.getElementById(‘def-fast-btn’);
+const deepBtn = document.getElementById(‘def-deep-btn’);
+if (App.defaultMode === ‘fast’) {
+fastBtn.className = ‘flex-1 py-2 rounded-xl text-sm font-medium border border-amber-500 bg-amber-500/10 text-amber-600 dark:text-amber-400 transition-all’;
+deepBtn.className = ‘flex-1 py-2 rounded-xl text-sm font-medium border divider text-muted transition-all’;
+} else {
+deepBtn.className = ‘flex-1 py-2 rounded-xl text-sm font-medium border border-indigo-500 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 transition-all’;
+fastBtn.className = ‘flex-1 py-2 rounded-xl text-sm font-medium border divider text-muted transition-all’;
+}
+}
+
+function clearAllData() {
+if (!confirm(‘Delete all conversations and reset settings?’)) return;
+localStorage.removeItem(‘nexus_state’);
+location.reload();
+}
+
+// ─────────────────────────────────────────────
+// COMMAND PALETTE
+// ─────────────────────────────────────────────
+function openCommandPalette() {
+document.getElementById(‘cmd-palette’).style.display = ‘flex’;
+document.getElementById(‘cmd-input’).value = ‘’;
+renderCommands(COMMANDS);
+setTimeout(() => document.getElementById(‘cmd-input’).focus(), 50);
+}
+
+function closeCommandPalette() {
+document.getElementById(‘cmd-palette’).style.display = ‘none’;
+}
+
+function renderCommands(cmds) {
+const list = document.getElementById(‘cmd-list’);
+list.innerHTML = cmds.map((c, i) => `<button onclick="runCommand(${i})" data-idx="${i}" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-surface-100 dark:hover:bg-surface-800 transition-all text-left"> <span class="text-base w-6 text-center">${c.icon}</span> <span class="text-primary">${c.label}</span> </button>`).join(’’);
+list.dataset.cmds = JSON.stringify(cmds.map(c => c.id));
+}
+
+let filteredCmds = [];
+function filterCommands(val) {
+filteredCmds = val ? COMMANDS.filter(c => c.label.toLowerCase().includes(val.toLowerCase())) : COMMANDS;
+renderCommands(filteredCmds);
+}
+
+function runCommand(idx) {
+const cmds = filteredCmds.length > 0 ? filteredCmds : COMMANDS;
+if (cmds[idx]) { cmds[idx].action(); closeCommandPalette(); }
+}
+
+document.getElementById(‘cmd-palette’).addEventListener(‘click’, e => {
+if (e.target === document.getElementById(‘cmd-palette’)) closeCommandPalette();
+});
+
+document.getElementById(‘settings-modal’).addEventListener(‘click’, e => {
+if (e.target === document.getElementById(‘settings-modal’)) closeSettings();
+});
+
+// ─────────────────────────────────────────────
+// SIDEBAR RESIZE
+// ─────────────────────────────────────────────
+function startResize(e) {
+e.preventDefault();
+const sidebar = document.getElementById(‘sidebar’);
+const startX = e.clientX;
+const startW = sidebar.offsetWidth;
+
+function onMove(e) {
+const newW = Math.max(180, Math.min(400, startW + e.clientX - startX));
+sidebar.style.width = newW + ‘px’;
+}
+function onUp() {
+document.removeEventListener(‘mousemove’, onMove);
+document.removeEventListener(‘mouseup’, onUp);
+}
+document.addEventListener(‘mousemove’, onMove);
+document.addEventListener(‘mouseup’, onUp);
+}
+
+function toggleSidebar() {
+document.getElementById(‘sidebar’).classList.toggle(‘open’);
+}
+
+// ─────────────────────────────────────────────
+// TOAST
+// ─────────────────────────────────────────────
+function showToast(msg, type = ‘success’) {
+const toast = document.createElement(‘div’);
+toast.className = `fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl text-sm font-medium shadow-lg animate-slide-up ${type === 'error' ? 'bg-red-500 text-white' : 'bg-surface-800 dark:bg-surface-200 text-white dark:text-surface-900'}`;
+toast.textContent = msg;
+document.body.appendChild(toast);
+setTimeout(() => { toast.style.opacity = ‘0’; toast.style.transition = ‘opacity 0.3s’; setTimeout(() => toast.remove(), 300); }, 2500);
+}
+
+// ─────────────────────────────────────────────
+// UTILS
+// ─────────────────────────────────────────────
+function escHtml(text) {
+return (text || ‘’).replace(/&/g,’&’).replace(/</g,’<’).replace(/>/g,’>’).replace(/”/g,’"’);
+}
+
+// ─────────────────────────────────────────────
+// BOOT
+// ─────────────────────────────────────────────
+document.addEventListener(‘DOMContentLoaded’, init);
+</script>
+
+</body>
+</html>

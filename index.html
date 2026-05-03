@@ -181,7 +181,7 @@ tailwind.config = {
 
 <!-- Settings Modal -->
 
-<div id="settings-modal" class="fixed inset-0 z-50 hidden items-center justify-center" style="background:rgba(0,0,0,0.5);backdrop-filter:blur(4px)">
+<div id="settings-modal" class="fixed inset-0 z-50 items-center justify-center" style="display:none;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);pointer-events:none">
   <div class="modal-bg rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 animate-slide-up theme-transition">
     <div class="flex items-center justify-between mb-6">
       <h2 class="text-primary font-semibold text-lg">Configuration</h2>
@@ -227,7 +227,7 @@ tailwind.config = {
 
 <!-- Command Palette -->
 
-<div id="cmd-palette" class="fixed inset-0 z-50 hidden items-center justify-start pt-[20vh]" style="background:rgba(0,0,0,0.4)">
+<div id="cmd-palette" class="fixed inset-0 z-50 items-center justify-start pt-[20vh]" style="display:none;background:rgba(0,0,0,0.4);pointer-events:none">
   <div class="mx-auto w-full max-w-xl px-4">
     <div class="modal-bg rounded-2xl shadow-2xl overflow-hidden animate-slide-up theme-transition">
       <div class="flex items-center gap-3 px-4 py-3 border-b divider">
@@ -787,579 +787,626 @@ function renderMessage(msg) {
 
 function renderMarkdown(text) {
   try {
-    const rendered = marked.parse(text);
-    // Wrap code blocks
-    return rendered.replace(/<pre><code class="(language-\w+)">/g, (match, cls) => {
-      const lang = cls.replace('language-', '');
-      return `</div><div class="code-block-wrap my-2"><div class="code-header px-4 py-2 flex items-center justify-between"><span class="text-xs font-mono text-surface-400">${lang}</span><button class="copy-btn text-xs text-surface-400 hover:text-white transition-colors" onclick="copyCode(this)">Copy</button></div><pre><code class="${cls}">`;
-    }).replace(/<\/code><\/pre>/g, `</code></pre></div><div class="md-content">`);
-
-} catch(e) {
-return escHtml(text);
+    return marked.parse(text || '');
+  } catch(e) {
+    return escHtml(text);
+  }
 }
+
+// Post-process code blocks in rendered HTML to add copy buttons
+function decorateCodeBlocks(containerEl) {
+  containerEl.querySelectorAll('pre').forEach(pre => {
+    if (pre.parentElement.classList.contains('code-block-wrap')) return;
+    const code = pre.querySelector('code');
+    const lang = code ? (code.className.replace('language-','').replace('hljs','').trim() || 'code') : 'code';
+    const wrap = document.createElement('div');
+    wrap.className = 'code-block-wrap my-3';
+    wrap.innerHTML = `<div class="code-header px-4 py-2 flex items-center justify-between"><span class="text-xs font-mono text-surface-400">${lang}</span><button class="copy-btn text-xs text-surface-400 hover:text-white transition-colors px-2 py-0.5 rounded">Copy</button></div>`;
+    pre.parentNode.insertBefore(wrap, pre);
+    wrap.appendChild(pre);
+    wrap.querySelector('.copy-btn').onclick = function() {
+      navigator.clipboard.writeText(code.innerText).then(() => {
+        this.textContent = 'Copied!';
+        setTimeout(() => this.textContent = 'Copy', 2000);
+      });
+    };
+  });
 }
 
 function applyCodeBlocks() {
-document.querySelectorAll(’#messages pre code’).forEach(block => {
-hljs.highlightElement(block);
-});
+  const container = document.getElementById('messages');
+  decorateCodeBlocks(container);
+  container.querySelectorAll('pre code').forEach(block => {
+    hljs.highlightElement(block);
+  });
 }
 
 function appendMessage(role, content, roleMeta = null) {
-const conv = getCurrentConv();
-if (!conv) return;
+  const conv = getCurrentConv();
+  if (!conv) return;
 
-const msg = { role, content, timestamp: Date.now() };
-if (roleMeta) msg.role_meta = roleMeta;
-conv.messages.push(msg);
+  const msg = { role, content, timestamp: Date.now() };
+  if (roleMeta) msg.role_meta = roleMeta;
+  conv.messages.push(msg);
 
-// Update title from first user message
-if (role === ‘user’ && conv.messages.filter(m => m.role === ‘user’).length === 1) {
-conv.title = content.slice(0, 50) + (content.length > 50 ? ‘…’ : ‘’);
-updateChatTitle(conv.title);
-renderChatList();
-}
+  // Update title from first user message
+  if (role === 'user' && conv.messages.filter(m => m.role === 'user').length === 1) {
+    conv.title = content.slice(0, 50) + (content.length > 50 ? '…' : '');
+    updateChatTitle(conv.title);
+    renderChatList();
+  }
 
-saveToStorage();
-hideWelcome();
+  saveToStorage();
+  hideWelcome();
 
-const container = document.getElementById(‘messages’);
-const div = document.createElement(‘div’);
-div.innerHTML = renderMessage(msg);
-container.appendChild(div.firstElementChild);
+  const container = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.innerHTML = renderMessage(msg);
+  container.appendChild(div.firstElementChild);
 
-applyCodeBlocks();
-scrollToBottom();
+  applyCodeBlocks();
+  scrollToBottom();
 }
 
 function scrollToBottom() {
-const area = document.getElementById(‘chat-area’);
-setTimeout(() => area.scrollTo({ top: area.scrollHeight, behavior: ‘smooth’ }), 50);
+  const area = document.getElementById('chat-area');
+  setTimeout(() => area.scrollTo({ top: area.scrollHeight, behavior: 'smooth' }), 50);
 }
 
 function clearChat() {
-const conv = getCurrentConv();
-if (conv) { conv.messages = []; saveToStorage(); }
-document.getElementById(‘messages’).innerHTML = ‘’;
-showWelcome();
+  const conv = getCurrentConv();
+  if (conv) { conv.messages = []; saveToStorage(); }
+  document.getElementById('messages').innerHTML = '';
+  showWelcome();
 }
 
 function copyMsg(btn) {
-const text = decodeURIComponent(btn.dataset.text);
-navigator.clipboard.writeText(text).then(() => {
-btn.textContent = ‘Copied!’;
-setTimeout(() => btn.textContent = ‘Copy’, 2000);
-});
+  const text = decodeURIComponent(btn.dataset.text);
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
 }
 
 function copyCode(btn) {
-const code = btn.closest(’.code-block-wrap’).querySelector(‘code’);
-navigator.clipboard.writeText(code.innerText).then(() => {
-btn.textContent = ‘Copied!’;
-setTimeout(() => btn.textContent = ‘Copy’, 2000);
-});
+  const code = btn.closest('.code-block-wrap').querySelector('code');
+  navigator.clipboard.writeText(code.innerText).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
 }
 
 function exportChat() {
-const conv = getCurrentConv();
-if (!conv) return;
-const text = conv.messages.map(m => `[${m.role.toUpperCase()}]\n${m.content}`).join(’\n\n—\n\n’);
-navigator.clipboard.writeText(text).then(() => {
-showToast(‘Conversation copied to clipboard’);
-});
+  const conv = getCurrentConv();
+  if (!conv) return;
+  const text = conv.messages.map(m => `[${m.role.toUpperCase()}]\n${m.content}`).join('\n\n---\n\n');
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('Conversation copied to clipboard');
+  });
 }
 
 // ─────────────────────────────────────────────
 // INPUT HANDLING
 // ─────────────────────────────────────────────
 function handleInputKeydown(e) {
-if (e.key === ‘Enter’ && !e.shiftKey) {
-e.preventDefault();
-sendMessage();
-}
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
 }
 
 function handleInputChange(el) {
-el.style.height = ‘auto’;
-el.style.height = Math.min(el.scrollHeight, 200) + ‘px’;
-document.getElementById(‘char-count’).textContent = el.value.length + ’ chars’;
-analyzeStressLevel(el.value);
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 200) + 'px';
+  document.getElementById('char-count').textContent = el.value.length + ' chars';
+  analyzeStressLevel(el.value);
 }
 
 function clearInputArea() {
-const inp = document.getElementById(‘chat-input’);
-inp.value = ‘’;
-inp.style.height = ‘auto’;
-document.getElementById(‘char-count’).textContent = ‘0 chars’;
+  const inp = document.getElementById('chat-input');
+  inp.value = '';
+  inp.style.height = 'auto';
+  document.getElementById('char-count').textContent = '0 chars';
 }
 
 function useTemplate(type) {
-const tmpl = TEMPLATES[type];
-if (!tmpl) return;
-const inp = document.getElementById(‘chat-input’);
-inp.value = tmpl;
-inp.style.height = ‘auto’;
-inp.style.height = Math.min(inp.scrollHeight, 200) + ‘px’;
-inp.focus();
-document.getElementById(‘char-count’).textContent = tmpl.length + ’ chars’;
+  const tmpl = TEMPLATES[type];
+  if (!tmpl) return;
+  const inp = document.getElementById('chat-input');
+  inp.value = tmpl;
+  inp.style.height = 'auto';
+  inp.style.height = Math.min(inp.scrollHeight, 200) + 'px';
+  inp.focus();
+  document.getElementById('char-count').textContent = tmpl.length + ' chars';
 }
 
 // ─────────────────────────────────────────────
 // STRESS LEVEL ANALYSIS
 // ─────────────────────────────────────────────
 function analyzeStressLevel(text) {
-if (!text || text.trim().length < 3) {
-setStress(50, ‘Waiting’);
-return;
+  if (!text || text.trim().length < 3) {
+    setStress(50, 'Waiting');
+    return;
+  }
+
+  let score = 100;
+  const t = text.toLowerCase();
+
+  // Penalize for vagueness
+  const vague = ['fix it', 'make it work', 'help', 'error', 'broken', 'bug', 'not working'];
+  vague.forEach(v => { if (t.includes(v) && text.length < 60) score -= 15; });
+
+  // Reward for specificity
+  if (text.length > 100) score += 10;
+  if (text.includes('```') || text.includes('error:') || text.includes('Error:')) score += 15;
+  if (text.split('\n').length > 3) score += 10;
+  if (/\w+\.\w+\(/.test(text)) score += 10; // contains code-like syntax
+  if (text.includes('expected') || text.includes('actual') || text.includes('should')) score += 10;
+
+  // Penalize for one-liners that are too short
+  if (text.trim().split('\n').length === 1 && text.length < 30) score -= 20;
+
+  score = Math.max(5, Math.min(100, score));
+
+  let label, color;
+  if (score >= 70) { label = 'Good'; color = 'bg-green-500'; }
+  else if (score >= 40) { label = 'Add context'; color = 'bg-amber-500'; }
+  else { label = 'Too vague'; color = 'bg-red-500'; }
+
+  setStress(score, label, color);
 }
 
-let score = 100;
-const t = text.toLowerCase();
-
-// Penalize for vagueness
-const vague = [‘fix it’, ‘make it work’, ‘help’, ‘error’, ‘broken’, ‘bug’, ‘not working’];
-vague.forEach(v => { if (t.includes(v) && text.length < 60) score -= 15; });
-
-// Reward for specificity
-if (text.length > 100) score += 10;
-if (text.includes(’```’) || text.includes(‘error:’) || text.includes(‘Error:’)) score += 15;
-if (text.split(’\n’).length > 3) score += 10;
-if (/\w+.\w+(/.test(text)) score += 10; // contains code-like syntax
-if (text.includes(‘expected’) || text.includes(‘actual’) || text.includes(‘should’)) score += 10;
-
-// Penalize for one-liners that are too short
-if (text.trim().split(’\n’).length === 1 && text.length < 30) score -= 20;
-
-score = Math.max(5, Math.min(100, score));
-
-let label, color;
-if (score >= 70) { label = ‘Good’; color = ‘bg-green-500’; }
-else if (score >= 40) { label = ‘Add context’; color = ‘bg-amber-500’; }
-else { label = ‘Too vague’; color = ‘bg-red-500’; }
-
-setStress(score, label, color);
-}
-
-function setStress(score, label, colorClass = ‘’) {
-const bar = document.getElementById(‘stress-bar’);
-const lbl = document.getElementById(‘stress-label’);
-bar.style.width = score + ‘%’;
-if (colorClass) {
-bar.className = ’h-full rounded-full ’ + colorClass;
-lbl.textContent = label;
-lbl.className = score >= 70 ? ‘text-xs font-semibold stress-low’ :
-score >= 40 ? ‘text-xs font-semibold stress-med’ :
-‘text-xs font-semibold stress-high’;
-} else {
-lbl.textContent = label;
-lbl.className = ‘text-xs font-semibold text-muted’;
-}
+function setStress(score, label, colorClass = '') {
+  const bar = document.getElementById('stress-bar');
+  const lbl = document.getElementById('stress-label');
+  bar.style.width = score + '%';
+  if (colorClass) {
+    bar.className = 'h-full rounded-full ' + colorClass;
+    lbl.textContent = label;
+    lbl.className = score >= 70 ? 'text-xs font-semibold stress-low' :
+                    score >= 40 ? 'text-xs font-semibold stress-med' :
+                                  'text-xs font-semibold stress-high';
+  } else {
+    lbl.textContent = label;
+    lbl.className = 'text-xs font-semibold text-muted';
+  }
 }
 
 // ─────────────────────────────────────────────
 // MODE & ROLE
 // ─────────────────────────────────────────────
 function switchMode(mode) {
-App.mode = mode;
-updateModeUI();
-updateModelDisplay();
-saveToStorage();
+  App.mode = mode;
+  updateModeUI();
+  updateModelDisplay();
+  saveToStorage();
 }
 
 function updateModeUI() {
-const fastBtn = document.getElementById(‘mode-fast-btn’);
-const deepBtn = document.getElementById(‘mode-deep-btn’);
+  const fastBtn = document.getElementById('mode-fast-btn');
+  const deepBtn = document.getElementById('mode-deep-btn');
 
-if (App.mode === ‘fast’) {
-fastBtn.className = ‘mode-badge flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all badge-fast’;
-deepBtn.className = ‘mode-badge flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-muted transition-all’;
-} else {
-deepBtn.className = ‘mode-badge flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all badge-deep’;
-fastBtn.className = ‘mode-badge flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-muted transition-all’;
-}
+  if (App.mode === 'fast') {
+    fastBtn.className = 'mode-badge flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all badge-fast';
+    deepBtn.className = 'mode-badge flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-muted transition-all';
+  } else {
+    deepBtn.className = 'mode-badge flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all badge-deep';
+    fastBtn.className = 'mode-badge flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-muted transition-all';
+  }
 }
 
 function updateModelDisplay() {
-document.getElementById(‘model-display’).textContent = MODELS[App.mode];
+  document.getElementById('model-display').textContent = MODELS[App.mode];
 }
 
 function detectRole(text) {
-const t = text.toLowerCase();
-if (t.includes(‘debug’) || t.includes(‘error’) || t.includes(‘bug’) || t.includes(‘fix’) || t.includes(‘crash’)) return ‘debugger’;
-if (t.includes(‘review’) || t.includes(‘feedback’) || t.includes(‘improve’) || t.includes(‘refactor’)) return ‘reviewer’;
-if (t.includes(‘test’) || t.includes(‘spec’) || t.includes(‘coverage’) || t.includes(‘unit test’)) return ‘tester’;
-if (t.includes(‘architect’) || t.includes(‘design’) || t.includes(‘scale’) || t.includes(‘system’) || t.includes(‘database’)) return ‘architect’;
-return ‘engineer’;
+  const t = text.toLowerCase();
+  if (t.includes('debug') || t.includes('error') || t.includes('bug') || t.includes('fix') || t.includes('crash')) return 'debugger';
+  if (t.includes('review') || t.includes('feedback') || t.includes('improve') || t.includes('refactor')) return 'reviewer';
+  if (t.includes('test') || t.includes('spec') || t.includes('coverage') || t.includes('unit test')) return 'tester';
+  if (t.includes('architect') || t.includes('design') || t.includes('scale') || t.includes('system') || t.includes('database')) return 'architect';
+  return 'engineer';
 }
 
 function updateRoleUI() {
-const role = App.roles[App.currentRole] || App.roles.engineer;
-document.getElementById(‘role-icon’).textContent = role.icon;
-document.getElementById(‘role-text’).textContent = role.label;
+  const role = App.roles[App.currentRole] || App.roles.engineer;
+  document.getElementById('role-icon').textContent = role.icon;
+  document.getElementById('role-text').textContent = role.label;
 }
 
 // ─────────────────────────────────────────────
 // SEND MESSAGE & AI API
 // ─────────────────────────────────────────────
 async function sendMessage() {
-const inp = document.getElementById(‘chat-input’);
-const text = inp.value.trim();
-if (!text || App.isStreaming) return;
+  const inp = document.getElementById('chat-input');
+  const text = inp.value.trim();
+  if (!text || App.isStreaming) return;
 
-const key = App.mode === ‘fast’ ? App.keys.fast : App.keys.deep;
-if (!key) {
-showToast(‘Please configure your API key in Settings’, ‘error’);
-openSettings();
-return;
-}
+  const key = App.mode === 'fast' ? App.keys.fast : App.keys.deep;
+  if (!key) {
+    showToast('Please configure your API key in Settings', 'error');
+    openSettings();
+    return;
+  }
 
-// Ensure conversation exists
-if (!App.currentConvId) newChat();
-const conv = getCurrentConv();
-if (!conv) return;
+  // Ensure conversation exists
+  if (!App.currentConvId) newChat();
+  const conv = getCurrentConv();
+  if (!conv) return;
 
-// Detect role
-App.currentRole = detectRole(text);
-updateRoleUI();
+  // Detect role
+  App.currentRole = detectRole(text);
+  updateRoleUI();
 
-// Clear input
-clearInputArea();
-setStress(50, ‘Waiting’);
+  // Clear input
+  clearInputArea();
+  setStress(50, 'Waiting');
 
-// Append user message
-appendMessage(‘user’, text);
+  // Append user message
+  appendMessage('user', text);
 
-// Show thinking
-App.isStreaming = true;
-document.getElementById(‘thinking-bar’).classList.remove(‘hidden’);
-document.getElementById(‘send-btn’).disabled = true;
-setThinkingText(App.mode);
-updateSuggestions([]);
+  // Show thinking
+  App.isStreaming = true;
+  document.getElementById('thinking-bar').classList.remove('hidden');
+  document.getElementById('send-btn').disabled = true;
+  setThinkingText(App.mode);
+  updateSuggestions([]);
 
-try {
-const response = await callGemini(key, conv.messages, text);
-document.getElementById(‘thinking-bar’).classList.add(‘hidden’);
-await streamResponse(response, conv);
-} catch(err) {
-document.getElementById(‘thinking-bar’).classList.add(‘hidden’);
-const errorMsg = err.message || ‘Something went wrong. Check your API key.’;
-appendMessage(‘assistant’, `❌ **Error:** ${errorMsg}\n\nDouble-check your API key in Settings.`,
-App.roles[App.currentRole]);
-}
+  try {
+    const response = await callGemini(key, conv.messages, text);
+    document.getElementById('thinking-bar').classList.add('hidden');
+    await streamResponse(response, conv);
+  } catch(err) {
+    document.getElementById('thinking-bar').classList.add('hidden');
+    const errorMsg = err.message || 'Something went wrong. Check your API key.';
+    appendMessage('assistant', `❌ **Error:** ${errorMsg}\n\nDouble-check your API key in Settings.`,
+      App.roles[App.currentRole]);
+  }
 
-App.isStreaming = false;
-document.getElementById(‘send-btn’).disabled = false;
-updateSuggestions();
+  App.isStreaming = false;
+  document.getElementById('send-btn').disabled = false;
+  updateSuggestions();
 }
 
 function setThinkingText(mode) {
-const texts = {
-fast: [‘Thinking fast…’, ‘Processing…’, ‘Almost there…’],
-deep: [‘Deep reasoning…’, ‘Analyzing carefully…’, ‘Working through this…’],
-};
-const arr = texts[mode] || texts.fast;
-const el = document.getElementById(‘thinking-text’);
-let i = 0;
-el.textContent = arr[0];
-const interval = setInterval(() => {
-i = (i + 1) % arr.length;
-el.textContent = arr[i];
-if (!App.isStreaming) clearInterval(interval);
-}, 1500);
+  const texts = {
+    fast: ['Thinking fast...', 'Processing...', 'Almost there...'],
+    deep: ['Deep reasoning...', 'Analyzing carefully...', 'Working through this...'],
+  };
+  const arr = texts[mode] || texts.fast;
+  const el = document.getElementById('thinking-text');
+  let i = 0;
+  el.textContent = arr[0];
+  const interval = setInterval(() => {
+    i = (i + 1) % arr.length;
+    el.textContent = arr[i];
+    if (!App.isStreaming) clearInterval(interval);
+  }, 1500);
 }
 
 async function callGemini(apiKey, messages, userText) {
-const model = MODELS[App.mode];
-const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?key=${apiKey}&alt=sse`;
+  const model = MODELS[App.mode];
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?key=${apiKey}&alt=sse`;
 
-// Build contents array
-const contents = [];
+  // Build contents array
+  const contents = [];
 
-// Add history (skip last user msg since we append separately)
-const histMsgs = messages.slice(0, -1); // exclude the user msg we just added
-histMsgs.forEach(m => {
-if (m.role === ‘user’) {
-contents.push({ role: ‘user’, parts: [{ text: m.content }] });
-} else if (m.role === ‘assistant’) {
-contents.push({ role: ‘model’, parts: [{ text: m.content }] });
-}
-});
+  // Add history (skip last user msg since we append separately)
+  const histMsgs = messages.slice(0, -1); // exclude the user msg we just added
+  histMsgs.forEach(m => {
+    if (m.role === 'user') {
+      contents.push({ role: 'user', parts: [{ text: m.content }] });
+    } else if (m.role === 'assistant') {
+      contents.push({ role: 'model', parts: [{ text: m.content }] });
+    }
+  });
 
-// Add current user message
-contents.push({ role: ‘user’, parts: [{ text: userText }] });
+  // Add current user message
+  contents.push({ role: 'user', parts: [{ text: userText }] });
 
-const body = {
-system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-contents,
-generationConfig: {
-temperature: App.mode === ‘fast’ ? 0.7 : 0.4,
-maxOutputTokens: App.mode === ‘fast’ ? 4096 : 8192,
-},
-safetySettings: [
-{ category: ‘HARM_CATEGORY_HARASSMENT’, threshold: ‘BLOCK_NONE’ },
-{ category: ‘HARM_CATEGORY_HATE_SPEECH’, threshold: ‘BLOCK_NONE’ },
-{ category: ‘HARM_CATEGORY_SEXUALLY_EXPLICIT’, threshold: ‘BLOCK_NONE’ },
-{ category: ‘HARM_CATEGORY_DANGEROUS_CONTENT’, threshold: ‘BLOCK_NONE’ },
-],
-};
+  const body = {
+    system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+    contents,
+    generationConfig: {
+      temperature: App.mode === 'fast' ? 0.7 : 0.4,
+      maxOutputTokens: App.mode === 'fast' ? 4096 : 8192,
+    },
+    safetySettings: [
+      { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+      { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+      { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+      { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+    ],
+  };
 
-const res = await fetch(url, {
-method: ‘POST’,
-headers: { ‘Content-Type’: ‘application/json’ },
-body: JSON.stringify(body),
-});
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
 
-if (!res.ok) {
-const err = await res.json().catch(() => ({ error: { message: `HTTP ${res.status}` } }));
-throw new Error(err.error?.message || `API error ${res.status}`);
-}
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: { message: `HTTP ${res.status}` } }));
+    throw new Error(err.error?.message || `API error ${res.status}`);
+  }
 
-return res;
+  return res;
 }
 
 async function streamResponse(response, conv) {
-const role = App.roles[App.currentRole] || App.roles.engineer;
-hideWelcome();
+  const role = App.roles[App.currentRole] || App.roles.engineer;
+  hideWelcome();
 
-// Create AI message element
-const container = document.getElementById(‘messages’);
-const wrapId = ‘ai-msg-’ + Date.now();
-const contentId = ‘ai-content-’ + Date.now();
+  // Create AI message element
+  const container = document.getElementById('messages');
+  const wrapId = 'ai-msg-' + Date.now();
+  const contentId = 'ai-content-' + Date.now();
 
-const wrap = document.createElement(‘div’);
-wrap.id = wrapId;
-wrap.className = ‘flex gap-3 animate-fade-in’;
-wrap.innerHTML = ` <div class="w-7 h-7 rounded-lg bg-amber-500 flex items-center justify-center flex-shrink-0 mt-0.5 text-sm"> ${role.icon} </div> <div class="flex-1 min-w-0"> <div class="text-xs text-muted mb-1.5 font-medium">${role.label}</div> <div id="${contentId}" class="msg-ai md-content text-sm leading-relaxed"></div> <div class="flex items-center gap-3 mt-2 opacity-0" id="${wrapId}-actions"> <button class="text-xs text-muted hover:text-secondary transition-colors" onclick="copyMsg(this)" data-text="">Copy</button> </div> </div>`;
-container.appendChild(wrap);
+  const wrap = document.createElement('div');
+  wrap.id = wrapId;
+  wrap.className = 'flex gap-3 animate-fade-in';
+  wrap.innerHTML = `
+    <div class="w-7 h-7 rounded-lg bg-amber-500 flex items-center justify-center flex-shrink-0 mt-0.5 text-sm">
+      ${role.icon}
+    </div>
+    <div class="flex-1 min-w-0">
+      <div class="text-xs text-muted mb-1.5 font-medium">${role.label}</div>
+      <div id="${contentId}" class="msg-ai md-content text-sm leading-relaxed"></div>
+      <div class="flex items-center gap-3 mt-2 opacity-0" id="${wrapId}-actions">
+        <button class="text-xs text-muted hover:text-secondary transition-colors" onclick="copyMsg(this)" data-text="">Copy</button>
+      </div>
+    </div>`;
+  container.appendChild(wrap);
 
-const contentEl = document.getElementById(contentId);
-let fullText = ‘’;
+  const contentEl = document.getElementById(contentId);
+  let fullText = '';
 
-const reader = response.body.getReader();
-const decoder = new TextDecoder();
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
 
-try {
-while (true) {
-const { done, value } = await reader.read();
-if (done) break;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
 
-```
-  const chunk = decoder.decode(value, { stream: true });
-  const lines = chunk.split('\n');
+      const chunk = decoder.decode(value, { stream: true });
+      const lines = chunk.split('\n');
 
-  for (const line of lines) {
-    if (!line.startsWith('data: ')) continue;
-    const data = line.slice(6).trim();
-    if (data === '[DONE]' || !data) continue;
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const data = line.slice(6).trim();
+        if (data === '[DONE]' || !data) continue;
 
-    try {
-      const json = JSON.parse(data);
-      const text = json.candidates?.[0]?.content?.parts?.[0]?.text || '';
-      if (text) {
-        fullText += text;
-        contentEl.innerHTML = renderMarkdown(fullText);
-        applyCodeBlocks();
-        scrollToBottom();
+        try {
+          const json = JSON.parse(data);
+          const text = json.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          if (text) {
+            fullText += text;
+            contentEl.innerHTML = renderMarkdown(fullText);
+            decorateCodeBlocks(contentEl);
+            contentEl.querySelectorAll('pre code').forEach(b => hljs.highlightElement(b));
+            scrollToBottom();
+          }
+        } catch(e) {
+          // Skip malformed chunks
+        }
       }
-    } catch(e) {
-      // Skip malformed chunks
     }
+  } catch(e) {
+    if (fullText === '') throw e;
   }
-}
-```
 
-} catch(e) {
-if (fullText === ‘’) throw e;
-}
+  // Finalize
+  contentEl.innerHTML = renderMarkdown(fullText);
+  decorateCodeBlocks(contentEl);
+  contentEl.querySelectorAll('pre code').forEach(b => hljs.highlightElement(b));
 
-// Finalize
-contentEl.innerHTML = renderMarkdown(fullText);
-applyCodeBlocks();
+  // Update actions
+  const actionsEl = document.getElementById(wrapId + '-actions');
+  if (actionsEl) {
+    actionsEl.style.opacity = '1';
+    actionsEl.querySelector('[data-text]').dataset.text = encodeURIComponent(fullText);
+  }
 
-// Update actions
-const actionsEl = document.getElementById(wrapId + ‘-actions’);
-if (actionsEl) {
-actionsEl.style.opacity = ‘1’;
-actionsEl.querySelector(’[data-text]’).dataset.text = encodeURIComponent(fullText);
-}
+  // Save to conversation
+  const msg = { role: 'assistant', content: fullText, timestamp: Date.now(), role_meta: { icon: role.icon, label: role.label } };
+  conv.messages.push(msg);
+  saveToStorage();
 
-// Save to conversation
-const msg = { role: ‘assistant’, content: fullText, timestamp: Date.now(), role_meta: { icon: role.icon, label: role.label } };
-conv.messages.push(msg);
-saveToStorage();
-
-scrollToBottom();
+  scrollToBottom();
 }
 
 // ─────────────────────────────────────────────
 // SUGGESTIONS
 // ─────────────────────────────────────────────
 const SUGGESTION_SETS = {
-empty: [‘Debug my code’, ‘Build a REST API’, ‘Review this function’, ‘Design a database schema’],
-after_user: [],
-after_ai: [‘Tell me more’, ‘Show me an example’, ‘How do I test this?’, ‘What are the tradeoffs?’],
+  empty: ['Debug my code', 'Build a REST API', 'Review this function', 'Design a database schema'],
+  after_user: [],
+  after_ai: ['Tell me more', 'Show me an example', 'How do I test this?', 'What are the tradeoffs?'],
 };
 
 function updateSuggestions(custom) {
-const container = document.getElementById(‘suggestion-chips’);
-const conv = getCurrentConv();
-let suggestions;
+  const container = document.getElementById('suggestion-chips');
+  const conv = getCurrentConv();
+  let suggestions;
 
-if (custom !== undefined) {
-suggestions = custom;
-} else if (!conv || conv.messages.length === 0) {
-suggestions = SUGGESTION_SETS.empty;
-} else if (conv.messages[conv.messages.length - 1]?.role === ‘assistant’) {
-suggestions = SUGGESTION_SETS.after_ai;
-} else {
-suggestions = [];
-}
+  if (custom !== undefined) {
+    suggestions = custom;
+  } else if (!conv || conv.messages.length === 0) {
+    suggestions = SUGGESTION_SETS.empty;
+  } else if (conv.messages[conv.messages.length - 1]?.role === 'assistant') {
+    suggestions = SUGGESTION_SETS.after_ai;
+  } else {
+    suggestions = [];
+  }
 
-container.innerHTML = suggestions.map(s => `<button onclick="useSuggestion('${escHtml(s)}')" class="prompt-chip text-xs px-3 py-1.5 rounded-xl border divider modal-bg hover:border-amber-500/40 text-muted hover:text-secondary transition-all theme-transition"> ${s} </button>`).join(’’);
+  container.innerHTML = suggestions.map(s => `
+    <button onclick="useSuggestion('${escHtml(s)}')"
+      class="prompt-chip text-xs px-3 py-1.5 rounded-xl border divider modal-bg hover:border-amber-500/40 text-muted hover:text-secondary transition-all theme-transition">
+      ${s}
+    </button>
+  `).join('');
 }
 
 function useSuggestion(text) {
-const inp = document.getElementById(‘chat-input’);
-inp.value = text;
-inp.focus();
-handleInputChange(inp);
+  const inp = document.getElementById('chat-input');
+  inp.value = text;
+  inp.focus();
+  handleInputChange(inp);
 }
 
 // ─────────────────────────────────────────────
 // SETTINGS
 // ─────────────────────────────────────────────
 function openSettings() {
-document.getElementById(‘key-fast’).value = App.keys.fast || ‘’;
-document.getElementById(‘key-deep’).value = App.keys.deep || ‘’;
-updateDefaultModeButtons();
-document.getElementById(‘settings-modal’).style.display = ‘flex’;
-closeCommandPalette();
+  document.getElementById('key-fast').value = App.keys.fast || '';
+  document.getElementById('key-deep').value = App.keys.deep || '';
+  updateDefaultModeButtons();
+  const el = document.getElementById('settings-modal');
+  el.style.display = 'flex';
+  el.style.pointerEvents = 'all';
+  closeCommandPalette();
 }
 
 function closeSettings() {
-document.getElementById(‘settings-modal’).style.display = ‘none’;
+  const el = document.getElementById('settings-modal');
+  el.style.display = 'none';
+  el.style.pointerEvents = 'none';
 }
 
 function saveSettings() {
-App.keys.fast = document.getElementById(‘key-fast’).value.trim();
-App.keys.deep = document.getElementById(‘key-deep’).value.trim();
-saveToStorage();
-closeSettings();
-showToast(‘Configuration saved’);
+  App.keys.fast = document.getElementById('key-fast').value.trim();
+  App.keys.deep = document.getElementById('key-deep').value.trim();
+  saveToStorage();
+  closeSettings();
+  showToast('Configuration saved');
 }
 
 function setDefaultMode(mode) {
-App.defaultMode = mode;
-App.mode = mode;
-updateDefaultModeButtons();
-updateModeUI();
-updateModelDisplay();
+  App.defaultMode = mode;
+  App.mode = mode;
+  updateDefaultModeButtons();
+  updateModeUI();
+  updateModelDisplay();
 }
 
 function updateDefaultModeButtons() {
-const fastBtn = document.getElementById(‘def-fast-btn’);
-const deepBtn = document.getElementById(‘def-deep-btn’);
-if (App.defaultMode === ‘fast’) {
-fastBtn.className = ‘flex-1 py-2 rounded-xl text-sm font-medium border border-amber-500 bg-amber-500/10 text-amber-600 dark:text-amber-400 transition-all’;
-deepBtn.className = ‘flex-1 py-2 rounded-xl text-sm font-medium border divider text-muted transition-all’;
-} else {
-deepBtn.className = ‘flex-1 py-2 rounded-xl text-sm font-medium border border-indigo-500 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 transition-all’;
-fastBtn.className = ‘flex-1 py-2 rounded-xl text-sm font-medium border divider text-muted transition-all’;
-}
+  const fastBtn = document.getElementById('def-fast-btn');
+  const deepBtn = document.getElementById('def-deep-btn');
+  if (App.defaultMode === 'fast') {
+    fastBtn.className = 'flex-1 py-2 rounded-xl text-sm font-medium border border-amber-500 bg-amber-500/10 text-amber-600 dark:text-amber-400 transition-all';
+    deepBtn.className = 'flex-1 py-2 rounded-xl text-sm font-medium border divider text-muted transition-all';
+  } else {
+    deepBtn.className = 'flex-1 py-2 rounded-xl text-sm font-medium border border-indigo-500 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 transition-all';
+    fastBtn.className = 'flex-1 py-2 rounded-xl text-sm font-medium border divider text-muted transition-all';
+  }
 }
 
 function clearAllData() {
-if (!confirm(‘Delete all conversations and reset settings?’)) return;
-localStorage.removeItem(‘nexus_state’);
-location.reload();
+  if (!confirm('Delete all conversations and reset settings?')) return;
+  localStorage.removeItem('nexus_state');
+  location.reload();
 }
 
 // ─────────────────────────────────────────────
 // COMMAND PALETTE
 // ─────────────────────────────────────────────
 function openCommandPalette() {
-document.getElementById(‘cmd-palette’).style.display = ‘flex’;
-document.getElementById(‘cmd-input’).value = ‘’;
-renderCommands(COMMANDS);
-setTimeout(() => document.getElementById(‘cmd-input’).focus(), 50);
+  const el = document.getElementById('cmd-palette');
+  el.style.display = 'flex';
+  el.style.pointerEvents = 'all';
+  document.getElementById('cmd-input').value = '';
+  renderCommands(COMMANDS);
+  filteredCmds = [];
+  setTimeout(() => document.getElementById('cmd-input').focus(), 50);
 }
 
 function closeCommandPalette() {
-document.getElementById(‘cmd-palette’).style.display = ‘none’;
+  const el = document.getElementById('cmd-palette');
+  el.style.display = 'none';
+  el.style.pointerEvents = 'none';
 }
 
 function renderCommands(cmds) {
-const list = document.getElementById(‘cmd-list’);
-list.innerHTML = cmds.map((c, i) => `<button onclick="runCommand(${i})" data-idx="${i}" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-surface-100 dark:hover:bg-surface-800 transition-all text-left"> <span class="text-base w-6 text-center">${c.icon}</span> <span class="text-primary">${c.label}</span> </button>`).join(’’);
-list.dataset.cmds = JSON.stringify(cmds.map(c => c.id));
+  const list = document.getElementById('cmd-list');
+  list.innerHTML = cmds.map((c, i) => `
+    <button onclick="runCommand(${i})" data-idx="${i}"
+      class="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-surface-100 dark:hover:bg-surface-800 transition-all text-left">
+      <span class="text-base w-6 text-center">${c.icon}</span>
+      <span class="text-primary">${c.label}</span>
+    </button>
+  `).join('');
+  list.dataset.cmds = JSON.stringify(cmds.map(c => c.id));
 }
 
 let filteredCmds = [];
 function filterCommands(val) {
-filteredCmds = val ? COMMANDS.filter(c => c.label.toLowerCase().includes(val.toLowerCase())) : COMMANDS;
-renderCommands(filteredCmds);
+  filteredCmds = val ? COMMANDS.filter(c => c.label.toLowerCase().includes(val.toLowerCase())) : [];
+  renderCommands(filteredCmds.length ? filteredCmds : COMMANDS);
 }
 
 function runCommand(idx) {
-const cmds = filteredCmds.length > 0 ? filteredCmds : COMMANDS;
-if (cmds[idx]) { cmds[idx].action(); closeCommandPalette(); }
+  const cmds = filteredCmds.length > 0 ? filteredCmds : COMMANDS;
+  if (cmds[idx]) { cmds[idx].action(); closeCommandPalette(); }
 }
 
-document.getElementById(‘cmd-palette’).addEventListener(‘click’, e => {
-if (e.target === document.getElementById(‘cmd-palette’)) closeCommandPalette();
-});
-
-document.getElementById(‘settings-modal’).addEventListener(‘click’, e => {
-if (e.target === document.getElementById(‘settings-modal’)) closeSettings();
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('cmd-palette').addEventListener('click', e => {
+    if (e.target === document.getElementById('cmd-palette')) closeCommandPalette();
+  });
+  document.getElementById('settings-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('settings-modal')) closeSettings();
+  });
 });
 
 // ─────────────────────────────────────────────
 // SIDEBAR RESIZE
 // ─────────────────────────────────────────────
 function startResize(e) {
-e.preventDefault();
-const sidebar = document.getElementById(‘sidebar’);
-const startX = e.clientX;
-const startW = sidebar.offsetWidth;
+  e.preventDefault();
+  const sidebar = document.getElementById('sidebar');
+  const startX = e.clientX;
+  const startW = sidebar.offsetWidth;
 
-function onMove(e) {
-const newW = Math.max(180, Math.min(400, startW + e.clientX - startX));
-sidebar.style.width = newW + ‘px’;
-}
-function onUp() {
-document.removeEventListener(‘mousemove’, onMove);
-document.removeEventListener(‘mouseup’, onUp);
-}
-document.addEventListener(‘mousemove’, onMove);
-document.addEventListener(‘mouseup’, onUp);
+  function onMove(e) {
+    const newW = Math.max(180, Math.min(400, startW + e.clientX - startX));
+    sidebar.style.width = newW + 'px';
+  }
+  function onUp() {
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+  }
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
 }
 
 function toggleSidebar() {
-document.getElementById(‘sidebar’).classList.toggle(‘open’);
+  document.getElementById('sidebar').classList.toggle('open');
 }
 
 // ─────────────────────────────────────────────
 // TOAST
 // ─────────────────────────────────────────────
-function showToast(msg, type = ‘success’) {
-const toast = document.createElement(‘div’);
-toast.className = `fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl text-sm font-medium shadow-lg animate-slide-up ${type === 'error' ? 'bg-red-500 text-white' : 'bg-surface-800 dark:bg-surface-200 text-white dark:text-surface-900'}`;
-toast.textContent = msg;
-document.body.appendChild(toast);
-setTimeout(() => { toast.style.opacity = ‘0’; toast.style.transition = ‘opacity 0.3s’; setTimeout(() => toast.remove(), 300); }, 2500);
+function showToast(msg, type = 'success') {
+  const toast = document.createElement('div');
+  toast.className = `fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl text-sm font-medium shadow-lg animate-slide-up
+    ${type === 'error' ? 'bg-red-500 text-white' : 'bg-surface-800 dark:bg-surface-200 text-white dark:text-surface-900'}`;
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; setTimeout(() => toast.remove(), 300); }, 2500);
 }
 
 // ─────────────────────────────────────────────
 // UTILS
 // ─────────────────────────────────────────────
 function escHtml(text) {
-return (text || ‘’).replace(/&/g,’&’).replace(/</g,’<’).replace(/>/g,’>’).replace(/”/g,’"’);
+  return (text || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 // ─────────────────────────────────────────────
 // BOOT
 // ─────────────────────────────────────────────
-document.addEventListener(‘DOMContentLoaded’, init);
+document.addEventListener('DOMContentLoaded', init);
 </script>
 
 </body>

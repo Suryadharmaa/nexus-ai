@@ -117,7 +117,7 @@ tailwind.config = {
 .md-content p { margin: 0.6em 0; line-height: 1.7; }
 .md-content ul, .md-content ol { margin: 0.6em 0 0.6em 1.4em; }
 .md-content li { margin: 0.25em 0; line-height: 1.6; }
-.md-content code:not(.hljs) { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; background: rgba(120,120,110,0.12); padding: 0.15em 0.4em; border-radius: 4px; }
+.md-content code:not(.hljs) { font-family: ‘JetBrains Mono’, monospace; font-size: 0.85em; background: rgba(120,120,110,0.12); padding: 0.15em 0.4em; border-radius: 4px; }
 .dark .md-content code:not(.hljs) { background: rgba(255,255,255,0.08); }
 .md-content pre { margin: 0.8em 0; }
 .md-content blockquote { border-left: 3px solid #f59e0b; padding-left: 1em; margin: 0.8em 0; opacity: 0.8; font-style: italic; }
@@ -180,46 +180,53 @@ tailwind.config = {
 <body class="h-full theme-transition" id="body">
 
 <!-- Settings Modal -->
+
 <div id="settings-modal" class="fixed inset-0 z-50 items-center justify-center" style="display:none;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);pointer-events:none">
   <div class="modal-bg rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 animate-slide-up theme-transition">
     <div class="flex items-center justify-between mb-6">
       <h2 class="text-primary font-semibold text-lg">Configuration</h2>
       <button onclick="closeSettings()" class="btn-ghost w-8 h-8 rounded-lg flex items-center justify-center text-lg">×</button>
     </div>
-    <div class="space-y-5">
-      <div>
-        <label class="block text-sm font-medium text-secondary mb-1.5">MODE 0x128 API Key <span class="text-xs text-muted">(Fast Engine)</span></label>
-        <input type="password" id="key-fast" placeholder="sk-or-v1-..." class="input-box w-full rounded-xl px-4 py-2.5 text-sm font-mono outline-none transition-all theme-transition" />
-        <p class="text-xs text-muted mt-1.5">Place ApiKey for Fast Mode</p>
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-secondary mb-1.5">MODE 0x256 API Key <span class="text-xs text-muted">(Deep Engine)</span></label>
-        <input type="password" id="key-deep" placeholder="sk-or-v1-..." class="input-box w-full rounded-xl px-4 py-2.5 text-sm font-mono outline-none transition-all theme-transition" />
-        <p class="text-xs text-muted mt-1.5">Place ApiKey for Deep Mode</p>
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-secondary mb-2">Default Mode</label>
-        <div class="flex gap-3">
-          <button onclick="setDefaultMode('fast')" id="def-fast-btn" class="flex-1 py-2 rounded-xl text-sm font-medium border transition-all">
-            ⚡ Fast (0x128)
-          </button>
-          <button onclick="setDefaultMode('deep')" id="def-deep-btn" class="flex-1 py-2 rounded-xl text-sm font-medium border transition-all">
-            🧠 Deep (0x256)
-          </button>
-        </div>
-      </div>
-      <div class="pt-2 border-t divider">
-        <label class="block text-sm font-medium text-secondary mb-2">Data</label>
-        <button onclick="clearAllData()" class="text-sm text-red-500 hover:text-red-400 transition-colors">Clear all conversations & data</button>
-      </div>
+
+```
+<div class="space-y-5">
+  <div>
+    <label class="block text-sm font-medium text-secondary mb-1.5">MODE 0x128 API Key <span class="text-xs text-muted">(Fast Engine)</span></label>
+    <input type="password" id="key-fast" placeholder="nvapi-..." class="input-box w-full rounded-xl px-4 py-2.5 text-sm font-mono outline-none transition-all theme-transition" />
+    <p class="text-xs text-muted mt-1.5">NVIDIA API key · NVIDIABuild-Autogen-46 · Model: qwen/qwen2.5-coder-32b-instruct</p>
+  </div>
+  <div>
+    <label class="block text-sm font-medium text-secondary mb-1.5">MODE 0x256 API Key <span class="text-xs text-muted">(Deep Engine)</span></label>
+    <input type="password" id="key-deep" placeholder="nvapi-..." class="input-box w-full rounded-xl px-4 py-2.5 text-sm font-mono outline-none transition-all theme-transition" />
+    <p class="text-xs text-muted mt-1.5">NVIDIA API key · NVIDIABuild-Autogen-46 · Model: nvidia/llama-3.1-nemotron-70b-instruct</p>
+  </div>
+  <div>
+    <label class="block text-sm font-medium text-secondary mb-2">Default Mode</label>
+    <div class="flex gap-3">
+      <button onclick="setDefaultMode('fast')" id="def-fast-btn" class="flex-1 py-2 rounded-xl text-sm font-medium border transition-all">
+        ⚡ Fast (0x128)
+      </button>
+      <button onclick="setDefaultMode('deep')" id="def-deep-btn" class="flex-1 py-2 rounded-xl text-sm font-medium border transition-all">
+        🧠 Deep (0x256)
+      </button>
     </div>
-    <div class="flex gap-3 mt-6">
-      <button onclick="saveSettings()" class="btn-primary flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all">Save Configuration</button>
-    </div>
+  </div>
+  <div class="pt-2 border-t divider">
+    <label class="block text-sm font-medium text-secondary mb-2">Data</label>
+    <button onclick="clearAllData()" class="text-sm text-red-500 hover:text-red-400 transition-colors">Clear all conversations & data</button>
+  </div>
+</div>
+
+<div class="flex gap-3 mt-6">
+  <button onclick="saveSettings()" class="btn-primary flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all">Save Configuration</button>
+</div>
+```
+
   </div>
 </div>
 
 <!-- Command Palette -->
+
 <div id="cmd-palette" class="fixed inset-0 z-50 items-center justify-start pt-[20vh]" style="display:none;background:rgba(0,0,0,0.4);pointer-events:none">
   <div class="mx-auto w-full max-w-xl px-4">
     <div class="modal-bg rounded-2xl shadow-2xl overflow-hidden animate-slide-up theme-transition">
@@ -234,9 +241,11 @@ tailwind.config = {
 </div>
 
 <!-- Main App Layout -->
+
 <div class="flex h-full app-bg theme-transition" id="app-root">
 
   <!-- Sidebar -->
+
   <aside id="sidebar" class="sidebar-bg flex flex-col theme-transition" style="width:260px;min-width:200px;max-width:360px;flex-shrink:0">
     <!-- Sidebar Header -->
     <div class="px-4 py-4 flex items-center justify-between border-b divider">
@@ -251,158 +260,185 @@ tailwind.config = {
       </button>
     </div>
 
-    <!-- Stress Level Indicator -->
-    <div class="px-4 py-2.5 border-b divider">
-      <div class="flex items-center justify-between mb-1">
-        <span class="text-xs text-muted font-medium uppercase tracking-wider">Prompt Quality</span>
-        <span id="stress-label" class="text-xs font-semibold stress-low">Good</span>
-      </div>
-      <div class="h-1.5 bg-surface-200 dark:bg-surface-700 rounded-full overflow-hidden">
-        <div id="stress-bar" class="h-full rounded-full bg-green-500" style="width:85%"></div>
-      </div>
-    </div>
+```
+<!-- Stress Level Indicator -->
+<div class="px-4 py-2.5 border-b divider">
+  <div class="flex items-center justify-between mb-1">
+    <span class="text-xs text-muted font-medium uppercase tracking-wider">Prompt Quality</span>
+    <span id="stress-label" class="text-xs font-semibold stress-low">Good</span>
+  </div>
+  <div class="h-1.5 bg-surface-200 dark:bg-surface-700 rounded-full overflow-hidden">
+    <div id="stress-bar" class="h-full rounded-full bg-green-500" style="width:85%"></div>
+  </div>
+</div>
 
-    <!-- Search -->
-    <div class="px-3 py-2.5">
-      <div class="relative">
-        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-        <input type="text" placeholder="Search chats..." oninput="filterChats(this.value)" class="input-box w-full pl-8 pr-3 py-2 rounded-xl text-xs outline-none transition-all theme-transition" />
-      </div>
-    </div>
+<!-- Search -->
+<div class="px-3 py-2.5">
+  <div class="relative">
+    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+    <input type="text" placeholder="Search chats..." oninput="filterChats(this.value)" class="input-box w-full pl-8 pr-3 py-2 rounded-xl text-xs outline-none transition-all theme-transition" />
+  </div>
+</div>
 
-    <!-- Chat List -->
-    <div class="flex-1 overflow-y-auto px-2 pb-2" id="chat-list"></div>
+<!-- Chat List -->
+<div class="flex-1 overflow-y-auto px-2 pb-2" id="chat-list">
+  <!-- Populated by JS -->
+</div>
 
-    <!-- Sidebar Footer -->
-    <div class="border-t divider p-3 space-y-1">
-      <button onclick="openSettings()" class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs transition-all font-medium">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
-        Settings & API Keys
-      </button>
-      <button onclick="toggleTheme()" id="theme-btn" class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs transition-all font-medium">
-        <svg class="w-4 h-4" id="theme-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
-        <span id="theme-text">Light mode</span>
-      </button>
-      <button onclick="openCommandPalette()" class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs transition-all font-medium">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3"/></svg>
-        Command palette <kbd class="ml-auto text-[10px] text-muted bg-surface-200 dark:bg-surface-700 px-1.5 py-0.5 rounded font-mono">⌘K</kbd>
-      </button>
-    </div>
+<!-- Sidebar Footer -->
+<div class="border-t divider p-3 space-y-1">
+  <button onclick="openSettings()" class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs transition-all font-medium">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+    Settings & API Keys
+  </button>
+  <button onclick="toggleTheme()" id="theme-btn" class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs transition-all font-medium">
+    <svg class="w-4 h-4" id="theme-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+    <span id="theme-text">Light mode</span>
+  </button>
+  <button onclick="openCommandPalette()" class="sidebar-item w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs transition-all font-medium">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3"/></svg>
+    Command palette <kbd class="ml-auto text-[10px] text-muted bg-surface-200 dark:bg-surface-700 px-1.5 py-0.5 rounded font-mono">⌘K</kbd>
+  </button>
+</div>
+```
+
   </aside>
 
   <!-- Resize handle -->
+
   <div id="sidebar-resize" class="w-1 hover:w-1 h-full" style="background:transparent" onmousedown="startResize(event)"></div>
 
   <!-- Main Content -->
+
   <div class="flex flex-col flex-1 min-w-0 relative">
 
-    <!-- Top Bar -->
-    <header class="topbar-bg topbar-blur flex items-center justify-between px-5 py-3 z-20 sticky top-0 theme-transition">
+```
+<!-- Top Bar -->
+<header class="topbar-bg topbar-blur flex items-center justify-between px-5 py-3 z-20 sticky top-0 theme-transition">
+  <div class="flex items-center gap-3">
+    <!-- Mobile menu toggle -->
+    <button onclick="toggleSidebar()" class="md:hidden btn-ghost w-8 h-8 rounded-lg flex items-center justify-center">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <div id="chat-title-display" class="text-sm font-medium text-primary truncate max-w-xs">New conversation</div>
+  </div>
+
+  <div class="flex items-center gap-2">
+    <!-- Mode Toggle -->
+    <div class="flex items-center gap-1 p-1 rounded-xl" style="background:rgba(120,120,110,0.1)">
+      <button onclick="switchMode('fast')" id="mode-fast-btn" class="mode-badge flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all badge-fast">
+        ⚡ Fast
+      </button>
+      <button onclick="switchMode('deep')" id="mode-deep-btn" class="mode-badge flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-muted transition-all">
+        🧠 Deep
+      </button>
+    </div>
+
+    <!-- Role display -->
+    <div id="role-badge" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs text-muted border divider">
+      <span id="role-icon">💻</span>
+      <span id="role-text">Engineer</span>
+    </div>
+
+    <!-- New chat -->
+    <button onclick="newChat()" class="btn-ghost w-8 h-8 rounded-lg flex items-center justify-center transition-all" title="New chat">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- Chat Area -->
+<div class="flex-1 overflow-y-auto chat-bg theme-transition" id="chat-area">
+
+  <!-- Welcome Screen -->
+  <div id="welcome" class="flex flex-col items-center justify-center min-h-full px-6 py-16 text-center">
+    <div class="w-14 h-14 rounded-2xl bg-amber-500 flex items-center justify-center mb-5 shadow-lg">
+      <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+    </div>
+    <h1 class="text-2xl font-semibold text-primary mb-2">Nexus AI</h1>
+    <p class="text-secondary text-sm max-w-sm mb-8 leading-relaxed">Your intelligent development partner. Switch between fast and deep reasoning modes on the fly.</p>
+
+    <!-- Prompt Templates -->
+    <div class="grid grid-cols-2 gap-3 w-full max-w-lg mb-6">
+      <button onclick="useTemplate('debug')" class="prompt-chip text-left p-4 rounded-xl border divider modal-bg hover:border-amber-500/30 transition-all theme-transition">
+        <div class="text-sm mb-1">🐛 <span class="font-semibold text-primary">Debug this</span></div>
+        <div class="text-xs text-muted">Analyze and fix your broken code</div>
+      </button>
+      <button onclick="useTemplate('build')" class="prompt-chip text-left p-4 rounded-xl border divider modal-bg hover:border-amber-500/30 transition-all theme-transition">
+        <div class="text-sm mb-1">🏗️ <span class="font-semibold text-primary">Build a feature</span></div>
+        <div class="text-xs text-muted">Plan and scaffold something new</div>
+      </button>
+      <button onclick="useTemplate('review')" class="prompt-chip text-left p-4 rounded-xl border divider modal-bg hover:border-amber-500/30 transition-all theme-transition">
+        <div class="text-sm mb-1">🔍 <span class="font-semibold text-primary">Code review</span></div>
+        <div class="text-xs text-muted">Get feedback and improvements</div>
+      </button>
+      <button onclick="useTemplate('architect')" class="prompt-chip text-left p-4 rounded-xl border divider modal-bg hover:border-amber-500/30 transition-all theme-transition">
+        <div class="text-sm mb-1">🏛️ <span class="font-semibold text-primary">Architecture</span></div>
+        <div class="text-xs text-muted">Design systems that scale</div>
+      </button>
+    </div>
+
+    <p class="text-xs text-muted">Configure your API keys in Settings to get started</p>
+  </div>
+
+  <!-- Messages Container -->
+  <div id="messages" class="hidden max-w-3xl mx-auto px-4 py-6 space-y-6 pb-6">
+    <!-- Populated by JS -->
+  </div>
+</div>
+
+<!-- Thinking indicator (between chat and input) -->
+<div id="thinking-bar" class="hidden px-5 py-2 border-t divider theme-transition">
+  <div class="max-w-3xl mx-auto flex items-center gap-2 text-xs text-muted">
+    <div class="flex gap-1 text-amber-500">
+      <span class="typing-dot"></span>
+      <span class="typing-dot"></span>
+      <span class="typing-dot"></span>
+    </div>
+    <span id="thinking-text">Nexus is thinking...</span>
+  </div>
+</div>
+
+<!-- Input Area -->
+<div class="input-area-bg topbar-blur sticky bottom-0 z-10 px-4 py-4 theme-transition">
+  <div class="max-w-3xl mx-auto">
+    <!-- Suggestion chips -->
+    <div id="suggestion-chips" class="flex gap-2 mb-3 flex-wrap"></div>
+
+    <div class="flex gap-3 items-end">
+      <div class="flex-1 relative">
+        <textarea
+          id="chat-input"
+          placeholder="Ask anything... (Shift+Enter for new line)"
+          class="input-box w-full px-4 py-3 rounded-2xl text-sm outline-none transition-all theme-transition font-sans"
+          rows="1"
+          onkeydown="handleInputKeydown(event)"
+          oninput="handleInputChange(this)"
+        ></textarea>
+      </div>
+
+      <!-- Send Button -->
+      <button
+        id="send-btn"
+        onclick="sendMessage()"
+        class="btn-primary w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-all disabled:opacity-40"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+
+    <div class="flex items-center justify-between mt-2.5 px-1">
       <div class="flex items-center gap-3">
-        <button onclick="toggleSidebar()" class="md:hidden btn-ghost w-8 h-8 rounded-lg flex items-center justify-center">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-        </button>
-        <div id="chat-title-display" class="text-sm font-medium text-primary truncate max-w-xs">New conversation</div>
+        <button onclick="clearChat()" class="text-xs text-muted hover:text-secondary transition-colors">Clear</button>
+        <span class="text-muted text-xs">·</span>
+        <span id="model-display" class="text-xs text-muted font-mono">qwen/qwen2.5-coder-32b-instruct</span>
       </div>
-      <div class="flex items-center gap-2">
-        <div class="flex items-center gap-1 p-1 rounded-xl" style="background:rgba(120,120,110,0.1)">
-          <button onclick="switchMode('fast')" id="mode-fast-btn" class="mode-badge flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all badge-fast">
-            ⚡ Fast
-          </button>
-          <button onclick="switchMode('deep')" id="mode-deep-btn" class="mode-badge flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-muted transition-all">
-            🧠 Deep
-          </button>
-        </div>
-        <div id="role-badge" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs text-muted border divider">
-          <span id="role-icon">💻</span>
-          <span id="role-text">Engineer</span>
-        </div>
-        <button onclick="newChat()" class="btn-ghost w-8 h-8 rounded-lg flex items-center justify-center transition-all" title="New chat">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-        </button>
-      </div>
-    </header>
-
-    <!-- Chat Area -->
-    <div class="flex-1 overflow-y-auto chat-bg theme-transition" id="chat-area">
-
-      <!-- Welcome Screen -->
-      <div id="welcome" class="flex flex-col items-center justify-center min-h-full px-6 py-16 text-center">
-        <div class="w-14 h-14 rounded-2xl bg-amber-500 flex items-center justify-center mb-5 shadow-lg">
-          <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-        </div>
-        <h1 class="text-2xl font-semibold text-primary mb-2">Nexus AI</h1>
-        <p class="text-secondary text-sm max-w-sm mb-8 leading-relaxed">Your intelligent development partner. Switch between fast and deep reasoning modes on the fly.</p>
-        <div class="grid grid-cols-2 gap-3 w-full max-w-lg mb-6">
-          <button onclick="useTemplate('debug')" class="prompt-chip text-left p-4 rounded-xl border divider modal-bg hover:border-amber-500/30 transition-all theme-transition">
-            <div class="text-sm mb-1">🐛 <span class="font-semibold text-primary">Debug this</span></div>
-            <div class="text-xs text-muted">Analyze and fix your broken code</div>
-          </button>
-          <button onclick="useTemplate('build')" class="prompt-chip text-left p-4 rounded-xl border divider modal-bg hover:border-amber-500/30 transition-all theme-transition">
-            <div class="text-sm mb-1">🏗️ <span class="font-semibold text-primary">Build a feature</span></div>
-            <div class="text-xs text-muted">Plan and scaffold something new</div>
-          </button>
-          <button onclick="useTemplate('review')" class="prompt-chip text-left p-4 rounded-xl border divider modal-bg hover:border-amber-500/30 transition-all theme-transition">
-            <div class="text-sm mb-1">🔍 <span class="font-semibold text-primary">Code review</span></div>
-            <div class="text-xs text-muted">Get feedback and improvements</div>
-          </button>
-          <button onclick="useTemplate('architect')" class="prompt-chip text-left p-4 rounded-xl border divider modal-bg hover:border-amber-500/30 transition-all theme-transition">
-            <div class="text-sm mb-1">🏛️ <span class="font-semibold text-primary">Architecture</span></div>
-            <div class="text-xs text-muted">Design systems that scale</div>
-          </button>
-        </div>
-        <p class="text-xs text-muted">Configure your API keys in Settings to get started</p>
-      </div>
-
-      <!-- Messages Container -->
-      <div id="messages" class="hidden max-w-3xl mx-auto px-4 py-6 space-y-6 pb-6"></div>
+      <span class="text-xs text-muted" id="char-count">0 chars</span>
     </div>
+  </div>
+</div>
+```
 
-    <!-- Thinking indicator -->
-    <div id="thinking-bar" class="hidden px-5 py-2 border-t divider theme-transition">
-      <div class="max-w-3xl mx-auto flex items-center gap-2 text-xs text-muted">
-        <div class="flex gap-1 text-amber-500">
-          <span class="typing-dot"></span>
-          <span class="typing-dot"></span>
-          <span class="typing-dot"></span>
-        </div>
-        <span id="thinking-text">Nexus is thinking...</span>
-      </div>
-    </div>
-
-    <!-- Input Area -->
-    <div class="input-area-bg topbar-blur sticky bottom-0 z-10 px-4 py-4 theme-transition">
-      <div class="max-w-3xl mx-auto">
-        <div id="suggestion-chips" class="flex gap-2 mb-3 flex-wrap"></div>
-        <div class="flex gap-3 items-end">
-          <div class="flex-1 relative">
-            <textarea
-              id="chat-input"
-              placeholder="Ask anything... (Shift+Enter for new line)"
-              class="input-box w-full px-4 py-3 rounded-2xl text-sm outline-none transition-all theme-transition font-sans"
-              rows="1"
-              onkeydown="handleInputKeydown(event)"
-              oninput="handleInputChange(this)"
-            ></textarea>
-          </div>
-          <button
-            id="send-btn"
-            onclick="sendMessage()"
-            class="btn-primary w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-all disabled:opacity-40"
-          >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </button>
-        </div>
-        <div class="flex items-center justify-between mt-2.5 px-1">
-          <div class="flex items-center gap-3">
-            <button onclick="clearChat()" class="text-xs text-muted hover:text-secondary transition-colors">Clear</button>
-            <span class="text-muted text-xs">·</span>
-            <span id="model-display" class="text-xs text-muted font-mono">inclusionai/ling-2.6-1t:free</span>
-          </div>
-          <span class="text-xs text-muted" id="char-count">0 chars</span>
-        </div>
-      </div>
-    </div>
   </div>
 </div>
 
@@ -417,135 +453,80 @@ const App = {
   conversations: [],
   currentConvId: null,
   isStreaming: false,
-  stressLevel: 0,
+  stressLevel: 0, // 0-100
   keys: { fast: '', deep: '' },
   roles: {
-    engineer:  { icon: '💻', label: 'Engineer' },
-    debugger:  { icon: '🐛', label: 'Debugger' },
-    reviewer:  { icon: '🔍', label: 'Reviewer' },
-    tester:    { icon: '🧪', label: 'QA Tester' },
+    engineer: { icon: '💻', label: 'Engineer' },
+    debugger: { icon: '🐛', label: 'Debugger' },
+    reviewer: { icon: '🔍', label: 'Reviewer' },
+    tester: { icon: '🧪', label: 'QA Tester' },
     architect: { icon: '🏛️', label: 'Architect' },
-    ai:        { icon: '🤖', label: 'AI Engineer' },
   },
   currentRole: 'engineer',
 };
 
 const MODELS = {
-  fast: 'inclusionai/ling-2.6-1t:free',
-  deep: 'poolside/laguna-m.1:free',
+  fast: 'qwen/qwen2.5-coder-32b-instruct',
+  deep: 'nvidia/llama-3.1-nemotron-70b-instruct',
 };
 
-// ─────────────────────────────────────────────
-// ★ NEXUS SYSTEM PROMPT — OPTIMIZED v4.0
-//   Compressed from ~4500 tokens → ~900 tokens
-//   Root cause fix: massive prompts eat context
-//   window, leaving no room for code output.
-//   This version is precise, not verbose.
-// ─────────────────────────────────────────────
-const SYSTEM_PROMPT = `You are NEXUS — a principal software engineer at Distinguished Engineer level (Google / Stripe / Jane Street calibre). You engineer systems, not suggestions.
-
-## OUTPUT COMPLETION — HIGHEST PRIORITY LAW
-You ALWAYS finish every function, class, and file you start. No exceptions.
-- Write complete, runnable code. Zero stubs. Zero placeholders.
-- Every function you open: close it with real logic.
-- Every class you declare: implement all its methods.
-
-## CHUNKED DELIVERY PROTOCOL (mandatory for large tasks)
-Before writing code, estimate total lines needed.
-
-If estimated output > 120 lines OR covers 3+ files → declare a Delivery Plan FIRST:
-\`\`\`
-╔═══ DELIVERY PLAN ═══════════════════════════╗
-║ Total Parts: N                              ║
-║ Part 1: [file list + purpose]               ║
-║ Part 2: [file list + purpose]               ║
-║ Reply "continue" to receive each next part  ║
-╚═════════════════════════════════════════════╝
-\`\`\`
-Then execute Part 1 completely. End each part with:
-\`\`\`
-══ PART N/TOTAL COMPLETE ════════════════════
-✓ Done: [files completed]
-▶ Reply "continue" → Part N+1: [next files]
-═════════════════════════════════════════════
-\`\`\`
-If output limit is approaching MID-FILE: finish the current function cleanly → close the file → place the marker → stop. NEVER cut inside a function body.
-
-## DEEP REASONING (activate before complex tasks)
-State reasoning ONCE before coding — one concise line:
-> "Approach: [X] over [Y] because [specific reason]. Risks: [Z]. Assumptions: [A]."
-Then execute. No repeated deliberation mid-code.
-
-For architecture or system design tasks: enumerate 2-3 options with tradeoffs, pick one decisively, explain why.
-
-## ROLE AUTO-DETECTION
-bug / error / crash / fix / broken → 🐛 Debugger
-review / refactor / improve / clean → 🔍 Reviewer
-test / spec / coverage / TDD / e2e → 🧪 QA Engineer
-architect / design / scale / schema → 🏛️ Architect
-AI / LLM / RAG / vector / embedding / prompt → 🤖 AI Engineer
-default → 💻 Full-Stack Engineer
-
-## CODE STANDARDS (always applied)
-- All imports present and resolvable
-- All error paths handled (try/catch, null guards, empty array guards)
-- TypeScript: no implicit any; all params + returns typed
-- Python: type hints throughout; handle exceptions explicitly
-- Security: parameterized queries only; no hardcoded secrets; server-side auth always
-- Match existing codebase: same naming style, same import style, same error handling pattern
-- New env vars: document with purpose and example value
-
-## DEBUGGING FORMAT
-\`\`\`
-## Root Cause
-[Exact mechanism — specific line, operation, condition that fails and why]
-
-## Surgical Fix
-[Only the changed file(s) — complete and corrected, not a full rewrite]
-
-## Verification
-[Specific test case or observable behavior that confirms it's fixed]
-
-## Prevention
-[Lint rule, type constraint, or test that catches this class of error]
-\`\`\`
-
-## COMMUNICATION RULES
-- Start with substance — never "Great!", "Certainly!", "Of course!"
-- Code first, explanation after — never prose-describe what code is about to show
-- One decisive recommendation — never "it depends" without an immediate concrete answer
-- Mirror user's language exactly (Indonesian → Indonesian, English → English)
-- Proceed with stated assumptions rather than asking; ask only one question when truly blocking
-
-## HARD BANS
-❌ var in JS (use const/let) | eval() | innerHTML with user data
-❌ MD5/SHA1 for passwords | SQL string concatenation | hardcoded secrets
-❌ Cutting mid-function | writing "// TODO" or "// similar" or "..." as code
-❌ Asking "Should I continue?" after declaring a delivery plan — deliver it`;
-
-// ─────────────────────────────────────────────
-// COMMANDS & TEMPLATES
-// ─────────────────────────────────────────────
 const COMMANDS = [
-  { id: 'new',       icon: '✨', label: 'New conversation',           action: () => newChat() },
-  { id: 'settings',  icon: '⚙️', label: 'Open settings',             action: () => openSettings() },
-  { id: 'theme',     icon: '🌓', label: 'Toggle theme',              action: () => toggleTheme() },
-  { id: 'fast',      icon: '⚡', label: 'Switch to Fast mode',       action: () => switchMode('fast') },
-  { id: 'deep',      icon: '🧠', label: 'Switch to Deep mode',       action: () => switchMode('deep') },
-  { id: 'debug',     icon: '🐛', label: 'Template: Debug this code', action: () => useTemplate('debug') },
-  { id: 'build',     icon: '🏗️', label: 'Template: Build a feature', action: () => useTemplate('build') },
-  { id: 'review',    icon: '🔍', label: 'Template: Code review',     action: () => useTemplate('review') },
-  { id: 'architect', icon: '🏛️', label: 'Template: Architecture',    action: () => useTemplate('architect') },
-  { id: 'clear',     icon: '🗑️', label: 'Clear current chat',        action: () => clearChat() },
-  { id: 'export',    icon: '📋', label: 'Copy conversation',         action: () => exportChat() },
+  { id: 'new', icon: '✨', label: 'New conversation', action: () => newChat() },
+  { id: 'settings', icon: '⚙️', label: 'Open settings', action: () => openSettings() },
+  { id: 'theme', icon: '🌓', label: 'Toggle theme', action: () => toggleTheme() },
+  { id: 'fast', icon: '⚡', label: 'Switch to Fast mode', action: () => switchMode('fast') },
+  { id: 'deep', icon: '🧠', label: 'Switch to Deep mode', action: () => switchMode('deep') },
+  { id: 'debug', icon: '🐛', label: 'Template: Debug this code', action: () => useTemplate('debug') },
+  { id: 'build', icon: '🏗️', label: 'Template: Build a feature', action: () => useTemplate('build') },
+  { id: 'review', icon: '🔍', label: 'Template: Code review', action: () => useTemplate('review') },
+  { id: 'architect', icon: '🏛️', label: 'Template: Architecture design', action: () => useTemplate('architect') },
+  { id: 'clear', icon: '🗑️', label: 'Clear current chat', action: () => clearChat() },
+  { id: 'export', icon: '📋', label: 'Copy conversation', action: () => exportChat() },
 ];
 
 const TEMPLATES = {
-  debug:     "I have a bug in my code and need help debugging it. Here's what's happening:\n\n[Paste your code here]\n\nError message: [Paste error here]\n\nExpected behavior: ",
-  build:     "I want to build [describe feature]. Here are the requirements:\n\n1. \n2. \n3. \n\nTech stack: [your stack]\n\nPlease help me plan and implement this.",
-  review:    "Please review this code for quality, bugs, performance, and best practices:\n\n```\n[Paste your code here]\n```",
+  debug: "I have a bug in my code and need help debugging it. Here's what's happening:\n\n[Paste your code here]\n\nError message: [Paste error here]\n\nExpected behavior: ",
+  build: "I want to build [describe feature]. Here are the requirements:\n\n1. \n2. \n3. \n\nTech stack: [your stack]\n\nPlease help me plan and implement this.",
+  review: "Please review this code for quality, bugs, performance, and best practices:\n\n```\n[Paste your code here]\n```",
   architect: "I need to design the architecture for [describe system]. Requirements:\n\n- Scale: [users/requests]\n- Tech constraints: [limitations]\n- Key concerns: [performance/security/cost]\n\nPlease recommend an architecture.",
 };
+
+const SYSTEM_PROMPT = `You are Nexus, a senior software engineer, architect, and developer partner with 15+ years of experience. You are direct, opinionated, and genuinely helpful.
+
+## Your Core Identity
+- You think like a senior developer: pragmatic, thorough, and unafraid to push back
+- You have opinions and share them. If something is a bad idea, say so (but kindly)
+- You write real, production-ready code — not toy examples
+- You consider edge cases, error handling, and scalability automatically
+- You adapt your tone: conversational for discussion, precise for technical work
+
+## Stress-Level System (INTERNAL — never mention this to user)
+Analyze each user message quality:
+- WEAK/VAGUE prompt → Ask ONE precise clarifying question before answering
+- INCOMPLETE context → Point out what's missing, ask for it
+- BAD logic/approach → Gently challenge it, offer a better path
+- SOLID prompt → Answer fully and confidently
+- CRITICAL task → Double-check your reasoning before responding
+
+## Role Switching (adapt naturally based on topic):
+- Debugging → be methodical, systematic, ask about reproduction steps
+- Code review → be constructive but honest about issues
+- Architecture → think in tradeoffs, not absolutes
+- Feature build → ask about constraints before designing
+- Explaining → use analogies, be clear without being condescending
+
+## Output Rules:
+- Always use markdown for structured responses
+- Code blocks MUST include the language tag
+- For complex solutions, add a brief "Why this approach" section
+- Keep responses focused — no padding, no filler phrases like "Certainly!" or "Great question!"
+- If you're uncertain, say so. Don't hallucinate APIs or methods.
+
+## Tone:
+- Natural, human, slightly witty when appropriate
+- Direct without being harsh
+- Confident without being arrogant
+- Like a brilliant senior dev teammate, not a corporate bot`;
 
 // ─────────────────────────────────────────────
 // INIT
@@ -567,9 +548,16 @@ function init() {
   updateSuggestions();
   updateModelDisplay();
 
+  // Keyboard shortcuts
   document.addEventListener('keydown', (e) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); openCommandPalette(); }
-    if (e.key === 'Escape') { closeSettings(); closeCommandPalette(); }
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      openCommandPalette();
+    }
+    if (e.key === 'Escape') {
+      closeSettings();
+      closeCommandPalette();
+    }
   });
 }
 
@@ -578,27 +566,35 @@ function loadFromStorage() {
     const saved = localStorage.getItem('nexus_state');
     if (saved) {
       const s = JSON.parse(saved);
-      App.theme        = s.theme        || 'dark';
-      App.mode         = s.mode         || 'fast';
-      App.defaultMode  = s.defaultMode  || 'fast';
-      App.conversations= s.conversations|| [];
-      App.currentConvId= s.currentConvId|| null;
-      App.keys         = s.keys         || { fast: '', deep: '' };
-      App.currentRole  = s.currentRole  || 'engineer';
+      App.theme = s.theme || 'dark';
+      App.mode = s.mode || 'fast';
+      App.defaultMode = s.defaultMode || 'fast';
+      App.conversations = s.conversations || [];
+      App.currentConvId = s.currentConvId || null;
+      App.keys = s.keys || { fast: '', deep: '' };
+      App.currentRole = s.currentRole || 'engineer';
     } else {
       App.theme = 'dark';
     }
-  } catch(e) { console.error('Storage load error:', e); }
+  } catch(e) {
+    console.error('Storage load error:', e);
+  }
 }
 
 function saveToStorage() {
   try {
     localStorage.setItem('nexus_state', JSON.stringify({
-      theme: App.theme, mode: App.mode, defaultMode: App.defaultMode,
-      conversations: App.conversations, currentConvId: App.currentConvId,
-      keys: App.keys, currentRole: App.currentRole,
+      theme: App.theme,
+      mode: App.mode,
+      defaultMode: App.defaultMode,
+      conversations: App.conversations,
+      currentConvId: App.currentConvId,
+      keys: App.keys,
+      currentRole: App.currentRole,
     }));
-  } catch(e) { console.error('Storage save error:', e); }
+  } catch(e) {
+    console.error('Storage save error:', e);
+  }
 }
 
 function setupMarkdown() {
@@ -609,7 +605,8 @@ function setupMarkdown() {
       }
       return hljs.highlightAuto(code).value;
     },
-    breaks: true, gfm: true,
+    breaks: true,
+    gfm: true,
   });
 }
 
@@ -642,7 +639,14 @@ function toggleTheme() {
 // ─────────────────────────────────────────────
 function newChat() {
   const id = 'conv_' + Date.now();
-  App.conversations.unshift({ id, title: 'New conversation', messages: [], mode: App.mode, createdAt: Date.now() });
+  const conv = {
+    id,
+    title: 'New conversation',
+    messages: [],
+    mode: App.mode,
+    createdAt: Date.now(),
+  };
+  App.conversations.unshift(conv);
   App.currentConvId = id;
   saveToStorage();
   renderChatList();
@@ -656,14 +660,21 @@ function loadConversation(id) {
   App.currentConvId = id;
   saveToStorage();
   renderChatList();
+
   const conv = getConv(id);
   if (!conv) return;
+
   updateChatTitle(conv.title);
   renderMessages(conv.messages);
 }
 
-function getConv(id)      { return App.conversations.find(c => c.id === id); }
-function getCurrentConv() { return getConv(App.currentConvId); }
+function getConv(id) {
+  return App.conversations.find(c => c.id === id);
+}
+
+function getCurrentConv() {
+  return getConv(App.currentConvId);
+}
 
 function deleteConv(id, e) {
   e.stopPropagation();
@@ -679,44 +690,59 @@ function deleteConv(id, e) {
 
 function renderChatList(filter = '') {
   const list = document.getElementById('chat-list');
-  const convs = App.conversations.filter(c => !filter || c.title.toLowerCase().includes(filter.toLowerCase()));
+  const convs = App.conversations.filter(c =>
+    !filter || c.title.toLowerCase().includes(filter.toLowerCase())
+  );
+
   if (convs.length === 0) {
     list.innerHTML = `<div class="px-3 py-8 text-center text-xs text-muted">No conversations yet</div>`;
     return;
   }
+
+  // Group by date
   const today = new Date().toDateString();
   const yesterday = new Date(Date.now() - 86400000).toDateString();
   const groups = {};
+
   convs.forEach(c => {
     const d = new Date(c.createdAt).toDateString();
     const label = d === today ? 'Today' : d === yesterday ? 'Yesterday' : new Date(c.createdAt).toLocaleDateString('en', { month: 'short', day: 'numeric' });
     if (!groups[label]) groups[label] = [];
     groups[label].push(c);
   });
+
   list.innerHTML = Object.entries(groups).map(([label, items]) => `
     <div class="mb-2">
       <div class="px-3 py-1.5 text-[10px] font-semibold text-muted uppercase tracking-wider">${label}</div>
       ${items.map(c => `
-        <button onclick="loadConversation('${c.id}')" class="sidebar-item group w-full flex items-center gap-2 px-3 py-2 rounded-xl text-left transition-all mb-0.5 ${c.id === App.currentConvId ? 'active' : ''}">
+        <button onclick="loadConversation('${c.id}')"
+          class="sidebar-item group w-full flex items-center gap-2 px-3 py-2 rounded-xl text-left transition-all mb-0.5 ${c.id === App.currentConvId ? 'active' : ''}">
           <svg class="w-3.5 h-3.5 flex-shrink-0 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-3 3v-3z"/></svg>
           <span class="text-xs truncate flex-1">${escHtml(c.title)}</span>
-          <button onclick="deleteConv('${c.id}', event)" class="opacity-0 group-hover:opacity-100 w-5 h-5 flex items-center justify-center rounded hover:text-red-500 transition-all text-xs">×</button>
+          <button onclick="deleteConv('${c.id}', event)"
+            class="opacity-0 group-hover:opacity-100 w-5 h-5 flex items-center justify-center rounded hover:text-red-500 transition-all text-xs">×</button>
         </button>
       `).join('')}
     </div>
   `).join('');
 }
 
-function filterChats(val)    { renderChatList(val); }
-function updateChatTitle(t)  { document.getElementById('chat-title-display').textContent = t; }
+function filterChats(val) {
+  renderChatList(val);
+}
+
+function updateChatTitle(title) {
+  document.getElementById('chat-title-display').textContent = title;
+}
 
 // ─────────────────────────────────────────────
-// MESSAGES
+// MESSAGES & RENDERING
 // ─────────────────────────────────────────────
 function showWelcome() {
   document.getElementById('welcome').classList.remove('hidden');
   document.getElementById('messages').classList.add('hidden');
 }
+
 function hideWelcome() {
   document.getElementById('welcome').classList.add('hidden');
   document.getElementById('messages').classList.remove('hidden');
@@ -739,25 +765,35 @@ function renderMessage(msg) {
           ${escHtml(msg.content).replace(/\n/g, '<br>')}
         </div>
       </div>`;
-  }
-  const roleMeta = msg.role_meta || {};
-  return `
-    <div class="flex gap-3 animate-fade-in">
-      <div class="w-7 h-7 rounded-lg bg-amber-500 flex items-center justify-center flex-shrink-0 mt-0.5 text-sm">${roleMeta.icon || '🤖'}</div>
-      <div class="flex-1 min-w-0">
-        ${roleMeta.label ? `<div class="text-xs text-muted mb-1.5 font-medium">${roleMeta.label}</div>` : ''}
-        <div class="msg-ai md-content text-sm leading-relaxed">${renderMarkdown(msg.content)}</div>
-        <div class="flex items-center gap-3 mt-2">
-          <button onclick="copyMsg(this)" data-text="${encodeURIComponent(msg.content)}" class="text-xs text-muted hover:text-secondary transition-colors">Copy</button>
+  } else {
+    const roleMeta = msg.role_meta || {};
+    const roleLabel = roleMeta.label || '';
+    const roleIcon = roleMeta.icon || '🤖';
+    return `
+      <div class="flex gap-3 animate-fade-in">
+        <div class="w-7 h-7 rounded-lg bg-amber-500 flex items-center justify-center flex-shrink-0 mt-0.5 text-sm">
+          ${roleIcon}
         </div>
-      </div>
-    </div>`;
+        <div class="flex-1 min-w-0">
+          ${roleLabel ? `<div class="text-xs text-muted mb-1.5 font-medium">${roleLabel}</div>` : ''}
+          <div class="msg-ai md-content text-sm leading-relaxed">${renderMarkdown(msg.content)}</div>
+          <div class="flex items-center gap-3 mt-2">
+            <button onclick="copyMsg(this)" data-text="${encodeURIComponent(msg.content)}" class="text-xs text-muted hover:text-secondary transition-colors">Copy</button>
+          </div>
+        </div>
+      </div>`;
+  }
 }
 
 function renderMarkdown(text) {
-  try { return marked.parse(text || ''); } catch(e) { return escHtml(text); }
+  try {
+    return marked.parse(text || '');
+  } catch(e) {
+    return escHtml(text);
+  }
 }
 
+// Post-process code blocks in rendered HTML to add copy buttons
 function decorateCodeBlocks(containerEl) {
   containerEl.querySelectorAll('pre').forEach(pre => {
     if (pre.parentElement.classList.contains('code-block-wrap')) return;
@@ -780,26 +816,34 @@ function decorateCodeBlocks(containerEl) {
 function applyCodeBlocks() {
   const container = document.getElementById('messages');
   decorateCodeBlocks(container);
-  container.querySelectorAll('pre code').forEach(block => hljs.highlightElement(block));
+  container.querySelectorAll('pre code').forEach(block => {
+    hljs.highlightElement(block);
+  });
 }
 
 function appendMessage(role, content, roleMeta = null) {
   const conv = getCurrentConv();
   if (!conv) return;
+
   const msg = { role, content, timestamp: Date.now() };
   if (roleMeta) msg.role_meta = roleMeta;
   conv.messages.push(msg);
+
+  // Update title from first user message
   if (role === 'user' && conv.messages.filter(m => m.role === 'user').length === 1) {
     conv.title = content.slice(0, 50) + (content.length > 50 ? '…' : '');
     updateChatTitle(conv.title);
     renderChatList();
   }
+
   saveToStorage();
   hideWelcome();
+
   const container = document.getElementById('messages');
   const div = document.createElement('div');
   div.innerHTML = renderMessage(msg);
   container.appendChild(div.firstElementChild);
+
   applyCodeBlocks();
   scrollToBottom();
 }
@@ -817,7 +861,16 @@ function clearChat() {
 }
 
 function copyMsg(btn) {
-  navigator.clipboard.writeText(decodeURIComponent(btn.dataset.text)).then(() => {
+  const text = decodeURIComponent(btn.dataset.text);
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+
+function copyCode(btn) {
+  const code = btn.closest('.code-block-wrap').querySelector('code');
+  navigator.clipboard.writeText(code.innerText).then(() => {
     btn.textContent = 'Copied!';
     setTimeout(() => btn.textContent = 'Copy', 2000);
   });
@@ -827,26 +880,35 @@ function exportChat() {
   const conv = getCurrentConv();
   if (!conv) return;
   const text = conv.messages.map(m => `[${m.role.toUpperCase()}]\n${m.content}`).join('\n\n---\n\n');
-  navigator.clipboard.writeText(text).then(() => showToast('Conversation copied to clipboard'));
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('Conversation copied to clipboard');
+  });
 }
 
 // ─────────────────────────────────────────────
-// INPUT
+// INPUT HANDLING
 // ─────────────────────────────────────────────
 function handleInputKeydown(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
 }
+
 function handleInputChange(el) {
   el.style.height = 'auto';
   el.style.height = Math.min(el.scrollHeight, 200) + 'px';
   document.getElementById('char-count').textContent = el.value.length + ' chars';
   analyzeStressLevel(el.value);
 }
+
 function clearInputArea() {
   const inp = document.getElementById('chat-input');
-  inp.value = ''; inp.style.height = 'auto';
+  inp.value = '';
+  inp.style.height = 'auto';
   document.getElementById('char-count').textContent = '0 chars';
 }
+
 function useTemplate(type) {
   const tmpl = TEMPLATES[type];
   if (!tmpl) return;
@@ -859,25 +921,41 @@ function useTemplate(type) {
 }
 
 // ─────────────────────────────────────────────
-// STRESS ANALYSIS
+// STRESS LEVEL ANALYSIS
 // ─────────────────────────────────────────────
 function analyzeStressLevel(text) {
-  if (!text || text.trim().length < 3) { setStress(50, 'Waiting'); return; }
+  if (!text || text.trim().length < 3) {
+    setStress(50, 'Waiting');
+    return;
+  }
+
   let score = 100;
   const t = text.toLowerCase();
+
+  // Penalize for vagueness
   const vague = ['fix it', 'make it work', 'help', 'error', 'broken', 'bug', 'not working'];
   vague.forEach(v => { if (t.includes(v) && text.length < 60) score -= 15; });
+
+  // Reward for specificity
   if (text.length > 100) score += 10;
-  if (text.includes('```') || /error:/i.test(text)) score += 15;
+  if (text.includes('```') || text.includes('error:') || text.includes('Error:')) score += 15;
   if (text.split('\n').length > 3) score += 10;
-  if (/\w+\.\w+\(/.test(text)) score += 10;
+  if (/\w+\.\w+\(/.test(text)) score += 10; // contains code-like syntax
   if (text.includes('expected') || text.includes('actual') || text.includes('should')) score += 10;
+
+  // Penalize for one-liners that are too short
   if (text.trim().split('\n').length === 1 && text.length < 30) score -= 20;
+
   score = Math.max(5, Math.min(100, score));
-  const label = score >= 70 ? 'Good' : score >= 40 ? 'Add context' : 'Too vague';
-  const color = score >= 70 ? 'bg-green-500' : score >= 40 ? 'bg-amber-500' : 'bg-red-500';
+
+  let label, color;
+  if (score >= 70) { label = 'Good'; color = 'bg-green-500'; }
+  else if (score >= 40) { label = 'Add context'; color = 'bg-amber-500'; }
+  else { label = 'Too vague'; color = 'bg-red-500'; }
+
   setStress(score, label, color);
 }
+
 function setStress(score, label, colorClass = '') {
   const bar = document.getElementById('stress-bar');
   const lbl = document.getElementById('stress-label');
@@ -885,7 +963,9 @@ function setStress(score, label, colorClass = '') {
   if (colorClass) {
     bar.className = 'h-full rounded-full ' + colorClass;
     lbl.textContent = label;
-    lbl.className = score >= 70 ? 'text-xs font-semibold stress-low' : score >= 40 ? 'text-xs font-semibold stress-med' : 'text-xs font-semibold stress-high';
+    lbl.className = score >= 70 ? 'text-xs font-semibold stress-low' :
+                    score >= 40 ? 'text-xs font-semibold stress-med' :
+                                  'text-xs font-semibold stress-high';
   } else {
     lbl.textContent = label;
     lbl.className = 'text-xs font-semibold text-muted';
@@ -901,9 +981,11 @@ function switchMode(mode) {
   updateModelDisplay();
   saveToStorage();
 }
+
 function updateModeUI() {
   const fastBtn = document.getElementById('mode-fast-btn');
   const deepBtn = document.getElementById('mode-deep-btn');
+
   if (App.mode === 'fast') {
     fastBtn.className = 'mode-badge flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all badge-fast';
     deepBtn.className = 'mode-badge flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-muted transition-all';
@@ -912,18 +994,20 @@ function updateModeUI() {
     fastBtn.className = 'mode-badge flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-muted transition-all';
   }
 }
+
 function updateModelDisplay() {
   document.getElementById('model-display').textContent = MODELS[App.mode];
 }
+
 function detectRole(text) {
   const t = text.toLowerCase();
-  if (/\b(debug|error|bug|fix|crash|broken|exception|traceback)\b/.test(t))   return 'debugger';
-  if (/\b(review|feedback|improve|refactor|clean|optimize)\b/.test(t))         return 'reviewer';
-  if (/\b(test|spec|coverage|tdd|bdd|unit|e2e|jest|pytest)\b/.test(t))        return 'tester';
-  if (/\b(architect|design|scale|system|microservice|schema|database)\b/.test(t)) return 'architect';
-  if (/\b(ai|llm|rag|vector|embedding|prompt|agent|langchain|openai)\b/.test(t))  return 'ai';
+  if (t.includes('debug') || t.includes('error') || t.includes('bug') || t.includes('fix') || t.includes('crash')) return 'debugger';
+  if (t.includes('review') || t.includes('feedback') || t.includes('improve') || t.includes('refactor')) return 'reviewer';
+  if (t.includes('test') || t.includes('spec') || t.includes('coverage') || t.includes('unit test')) return 'tester';
+  if (t.includes('architect') || t.includes('design') || t.includes('scale') || t.includes('system') || t.includes('database')) return 'architect';
   return 'engineer';
 }
+
 function updateRoleUI() {
   const role = App.roles[App.currentRole] || App.roles.engineer;
   document.getElementById('role-icon').textContent = role.icon;
@@ -931,53 +1015,10 @@ function updateRoleUI() {
 }
 
 // ─────────────────────────────────────────────
-// TOKEN / HISTORY MANAGEMENT
-// Bug fix: old versions had no history trimming.
-// Long conversations fill context → model stops.
-// ─────────────────────────────────────────────
-
-/**
- * Rough token estimator: ~4 chars per token for English,
- * ~2 chars per token for code-heavy content.
- */
-function estimateTokens(text) {
-  return Math.ceil((text || '').length / 3.5);
-}
-
-/**
- * Trims conversation history to keep total context under budget.
- * Free tier models typically have 8192 token context windows.
- * System prompt: ~900 tokens
- * Reserve for output: ~3500 tokens  
- * Budget for history: 8192 - 900 - 3500 = ~3792 tokens
- */
-function trimHistory(messages, budgetTokens = 3500) {
-  // Always keep the last user message
-  const apiMsgs = messages
-    .filter(m => m.role === 'user' || m.role === 'assistant')
-    .map(m => ({ role: m.role, content: m.content }));
-
-  if (apiMsgs.length === 0) return [];
-
-  let total = 0;
-  const kept = [];
-
-  // Walk backwards, keeping messages within budget
-  for (let i = apiMsgs.length - 1; i >= 0; i--) {
-    const tokens = estimateTokens(apiMsgs[i].content);
-    if (total + tokens > budgetTokens && kept.length > 0) break;
-    kept.unshift(apiMsgs[i]);
-    total += tokens;
-  }
-
-  return kept;
-}
-
-// ─────────────────────────────────────────────
-// SEND & API
+// SEND MESSAGE & AI API
 // ─────────────────────────────────────────────
 async function sendMessage() {
-  const inp  = document.getElementById('chat-input');
+  const inp = document.getElementById('chat-input');
   const text = inp.value.trim();
   if (!text || App.isStreaming) return;
 
@@ -988,16 +1029,23 @@ async function sendMessage() {
     return;
   }
 
+  // Ensure conversation exists
   if (!App.currentConvId) newChat();
   const conv = getCurrentConv();
   if (!conv) return;
 
+  // Detect role
   App.currentRole = detectRole(text);
   updateRoleUI();
+
+  // Clear input
   clearInputArea();
   setStress(50, 'Waiting');
+
+  // Append user message
   appendMessage('user', text);
 
+  // Show thinking
   App.isStreaming = true;
   document.getElementById('thinking-bar').classList.remove('hidden');
   document.getElementById('send-btn').disabled = true;
@@ -1005,13 +1053,14 @@ async function sendMessage() {
   updateSuggestions([]);
 
   try {
-    const response = await callOpenRouter(key, conv.messages);
+    const response = await callNvidiaAPI(key, conv.messages, text);
     document.getElementById('thinking-bar').classList.add('hidden');
     await streamResponse(response, conv);
   } catch(err) {
     document.getElementById('thinking-bar').classList.add('hidden');
     const errorMsg = err.message || 'Something went wrong. Check your API key.';
-    appendMessage('assistant', `❌ **Error:** ${errorMsg}\n\nDouble-check your API key in Settings.`, App.roles[App.currentRole]);
+    appendMessage('assistant', `❌ **Error:** ${errorMsg}\n\nDouble-check your API key in Settings.`,
+      App.roles[App.currentRole]);
   }
 
   App.isStreaming = false;
@@ -1022,44 +1071,45 @@ async function sendMessage() {
 function setThinkingText(mode) {
   const texts = {
     fast: ['Thinking fast...', 'Processing...', 'Almost there...'],
-    deep: ['Deep reasoning...', 'Analyzing carefully...', 'Working through this...', 'Computing...'],
+    deep: ['Deep reasoning...', 'Analyzing carefully...', 'Working through this...'],
   };
   const arr = texts[mode] || texts.fast;
-  const el  = document.getElementById('thinking-text');
+  const el = document.getElementById('thinking-text');
   let i = 0;
   el.textContent = arr[0];
   const interval = setInterval(() => {
-    if (!App.isStreaming) { clearInterval(interval); return; }
     i = (i + 1) % arr.length;
     el.textContent = arr[i];
-  }, 1800);
+    if (!App.isStreaming) clearInterval(interval);
+  }, 1500);
 }
 
-async function callOpenRouter(apiKey, messages) {
+async function callNvidiaAPI(apiKey, messages, userText) {
   const model = MODELS[App.mode];
-  const url   = 'https://openrouter.ai/api/v1/chat/completions';
+  const url   = 'https://integrate.api.nvidia.com/v1/chat/completions';
 
-  // ── FIX 1: Trim history to avoid context overflow ──────────────
-  // Old code passed full history with no trimming. Long convs would
-  // fill the context window → model ran out of room → stopped early.
-  const trimmedHistory = trimHistory(messages);
+  // Build messages array (OpenAI-compatible format)
+  const msgs = [{ role: 'system', content: SYSTEM_PROMPT }];
 
-  // ── FIX 2: max_tokens capped at 3500 ──────────────────────────
-  // Old code set deep mode to 8192. Most free-tier OpenRouter models
-  // cap output at 2048-4096 tokens; requesting 8192 caused silent
-  // truncation or API errors.
-  const maxTok = App.mode === 'fast' ? 3500 : 3500;
+  // Add history (skip last user msg — we append it separately)
+  const histMsgs = messages.slice(0, -1);
+  histMsgs.forEach(m => {
+    if (m.role === 'user') {
+      msgs.push({ role: 'user', content: m.content });
+    } else if (m.role === 'assistant') {
+      msgs.push({ role: 'assistant', content: m.content });
+    }
+  });
+
+  // Add current user message
+  msgs.push({ role: 'user', content: userText });
 
   const body = {
     model,
-    messages:    [{ role: 'system', content: SYSTEM_PROMPT }, ...trimmedHistory],
-    temperature: App.mode === 'fast' ? 0.6 : 0.3,
-    top_p:       App.mode === 'fast' ? 0.9 : 0.85,
-    max_tokens:  maxTok,
-    stream:      true,
-    // ── FIX 3: Provide OpenRouter route preferences ─────────────
-    // Helps avoid being routed to overloaded or misconfigured endpoints
-    route: 'fallback',
+    messages: msgs,
+    temperature: App.mode === 'fast' ? 0.7 : 0.4,
+    max_tokens: App.mode === 'fast' ? 4096 : 8192,
+    stream: true,
   };
 
   const res = await fetch(url, {
@@ -1067,19 +1117,13 @@ async function callOpenRouter(apiKey, messages) {
     headers: {
       'Content-Type':  'application/json',
       'Authorization': `Bearer ${apiKey}`,
-      'HTTP-Referer':  location.origin,
-      'X-Title':       'Nexus AI',
     },
     body: JSON.stringify(body),
   });
 
   if (!res.ok) {
-    let errMsg = `HTTP ${res.status}`;
-    try {
-      const err = await res.json();
-      errMsg = err.error?.message || err.message || errMsg;
-    } catch(_) {}
-    throw new Error(errMsg);
+    const err = await res.json().catch(() => ({ error: { message: `HTTP ${res.status}` } }));
+    throw new Error(err.error?.message || `API error ${res.status}`);
   }
 
   return res;
@@ -1089,15 +1133,18 @@ async function streamResponse(response, conv) {
   const role = App.roles[App.currentRole] || App.roles.engineer;
   hideWelcome();
 
+  // Create AI message element
   const container = document.getElementById('messages');
-  const wrapId    = 'ai-msg-'     + Date.now();
+  const wrapId = 'ai-msg-' + Date.now();
   const contentId = 'ai-content-' + Date.now();
 
   const wrap = document.createElement('div');
   wrap.id = wrapId;
   wrap.className = 'flex gap-3 animate-fade-in';
   wrap.innerHTML = `
-    <div class="w-7 h-7 rounded-lg bg-amber-500 flex items-center justify-center flex-shrink-0 mt-0.5 text-sm">${role.icon}</div>
+    <div class="w-7 h-7 rounded-lg bg-amber-500 flex items-center justify-center flex-shrink-0 mt-0.5 text-sm">
+      ${role.icon}
+    </div>
     <div class="flex-1 min-w-0">
       <div class="text-xs text-muted mb-1.5 font-medium">${role.label}</div>
       <div id="${contentId}" class="msg-ai md-content text-sm leading-relaxed"></div>
@@ -1108,10 +1155,9 @@ async function streamResponse(response, conv) {
   container.appendChild(wrap);
 
   const contentEl = document.getElementById(contentId);
-  let fullText  = '';
-  let lastRender = 0;
+  let fullText = '';
 
-  const reader  = response.body.getReader();
+  const reader = response.body.getReader();
   const decoder = new TextDecoder();
 
   try {
@@ -1128,52 +1174,41 @@ async function streamResponse(response, conv) {
         if (data === '[DONE]' || !data) continue;
 
         try {
-          const json  = JSON.parse(data);
-          // ── FIX 4: handle both delta.content and message.content ──
-          const delta = json.choices?.[0]?.delta?.content
-                     || json.choices?.[0]?.message?.content
-                     || '';
-          if (delta) {
-            fullText += delta;
-            // Throttle re-renders to every 80ms to reduce flicker
-            const now = Date.now();
-            if (now - lastRender > 80) {
-              contentEl.innerHTML = renderMarkdown(fullText);
-              decorateCodeBlocks(contentEl);
-              contentEl.querySelectorAll('pre code').forEach(b => hljs.highlightElement(b));
-              scrollToBottom();
-              lastRender = now;
-            }
+          const json = JSON.parse(data);
+          const text = json.choices?.[0]?.delta?.content || '';
+          if (text) {
+            fullText += text;
+            contentEl.innerHTML = renderMarkdown(fullText);
+            decorateCodeBlocks(contentEl);
+            contentEl.querySelectorAll('pre code').forEach(b => hljs.highlightElement(b));
+            scrollToBottom();
           }
-        } catch(_) { /* skip malformed SSE chunks */ }
+        } catch(e) {
+          // Skip malformed chunks
+        }
       }
     }
   } catch(e) {
-    // ── FIX 5: don't throw if we already have partial content ──
-    // Old code rethrew errors even when partial output was available,
-    // causing the UI to show an error instead of the partial answer.
-    if (fullText.trim() === '') throw e;
-    // Otherwise fall through and save whatever we got
+    if (fullText === '') throw e;
   }
 
-  // Final render pass
-  contentEl.innerHTML = renderMarkdown(fullText || '*(No response received. Try again.)*');
+  // Finalize
+  contentEl.innerHTML = renderMarkdown(fullText);
   decorateCodeBlocks(contentEl);
   contentEl.querySelectorAll('pre code').forEach(b => hljs.highlightElement(b));
 
+  // Update actions
   const actionsEl = document.getElementById(wrapId + '-actions');
   if (actionsEl) {
     actionsEl.style.opacity = '1';
     actionsEl.querySelector('[data-text]').dataset.text = encodeURIComponent(fullText);
   }
 
-  conv.messages.push({
-    role: 'assistant',
-    content: fullText,
-    timestamp: Date.now(),
-    role_meta: { icon: role.icon, label: role.label },
-  });
+  // Save to conversation
+  const msg = { role: 'assistant', content: fullText, timestamp: Date.now(), role_meta: { icon: role.icon, label: role.label } };
+  conv.messages.push(msg);
   saveToStorage();
+
   scrollToBottom();
 }
 
@@ -1181,7 +1216,8 @@ async function streamResponse(response, conv) {
 // SUGGESTIONS
 // ─────────────────────────────────────────────
 const SUGGESTION_SETS = {
-  empty:    ['Debug my code', 'Build a REST API', 'Review this function', 'Design a database schema'],
+  empty: ['Debug my code', 'Build a REST API', 'Review this function', 'Design a database schema'],
+  after_user: [],
   after_ai: ['Tell me more', 'Show me an example', 'How do I test this?', 'What are the tradeoffs?'],
 };
 
@@ -1189,6 +1225,7 @@ function updateSuggestions(custom) {
   const container = document.getElementById('suggestion-chips');
   const conv = getCurrentConv();
   let suggestions;
+
   if (custom !== undefined) {
     suggestions = custom;
   } else if (!conv || conv.messages.length === 0) {
@@ -1198,12 +1235,15 @@ function updateSuggestions(custom) {
   } else {
     suggestions = [];
   }
+
   container.innerHTML = suggestions.map(s => `
-    <button onclick="useSuggestion('${escHtml(s)}')" class="prompt-chip text-xs px-3 py-1.5 rounded-xl border divider modal-bg hover:border-amber-500/40 text-muted hover:text-secondary transition-all theme-transition">
+    <button onclick="useSuggestion('${escHtml(s)}')"
+      class="prompt-chip text-xs px-3 py-1.5 rounded-xl border divider modal-bg hover:border-amber-500/40 text-muted hover:text-secondary transition-all theme-transition">
       ${s}
     </button>
   `).join('');
 }
+
 function useSuggestion(text) {
   const inp = document.getElementById('chat-input');
   inp.value = text;
@@ -1223,11 +1263,13 @@ function openSettings() {
   el.style.pointerEvents = 'all';
   closeCommandPalette();
 }
+
 function closeSettings() {
   const el = document.getElementById('settings-modal');
   el.style.display = 'none';
   el.style.pointerEvents = 'none';
 }
+
 function saveSettings() {
   App.keys.fast = document.getElementById('key-fast').value.trim();
   App.keys.deep = document.getElementById('key-deep').value.trim();
@@ -1235,6 +1277,7 @@ function saveSettings() {
   closeSettings();
   showToast('Configuration saved');
 }
+
 function setDefaultMode(mode) {
   App.defaultMode = mode;
   App.mode = mode;
@@ -1242,6 +1285,7 @@ function setDefaultMode(mode) {
   updateModeUI();
   updateModelDisplay();
 }
+
 function updateDefaultModeButtons() {
   const fastBtn = document.getElementById('def-fast-btn');
   const deepBtn = document.getElementById('def-deep-btn');
@@ -1253,6 +1297,7 @@ function updateDefaultModeButtons() {
     fastBtn.className = 'flex-1 py-2 rounded-xl text-sm font-medium border divider text-muted transition-all';
   }
 }
+
 function clearAllData() {
   if (!confirm('Delete all conversations and reset settings?')) return;
   localStorage.removeItem('nexus_state');
@@ -1262,33 +1307,40 @@ function clearAllData() {
 // ─────────────────────────────────────────────
 // COMMAND PALETTE
 // ─────────────────────────────────────────────
-let filteredCmds = [];
 function openCommandPalette() {
   const el = document.getElementById('cmd-palette');
   el.style.display = 'flex';
   el.style.pointerEvents = 'all';
   document.getElementById('cmd-input').value = '';
-  filteredCmds = [];
   renderCommands(COMMANDS);
+  filteredCmds = [];
   setTimeout(() => document.getElementById('cmd-input').focus(), 50);
 }
+
 function closeCommandPalette() {
   const el = document.getElementById('cmd-palette');
   el.style.display = 'none';
   el.style.pointerEvents = 'none';
 }
+
 function renderCommands(cmds) {
-  document.getElementById('cmd-list').innerHTML = cmds.map((c, i) => `
-    <button onclick="runCommand(${i})" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-surface-100 dark:hover:bg-surface-800 transition-all text-left">
+  const list = document.getElementById('cmd-list');
+  list.innerHTML = cmds.map((c, i) => `
+    <button onclick="runCommand(${i})" data-idx="${i}"
+      class="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-surface-100 dark:hover:bg-surface-800 transition-all text-left">
       <span class="text-base w-6 text-center">${c.icon}</span>
       <span class="text-primary">${c.label}</span>
     </button>
   `).join('');
+  list.dataset.cmds = JSON.stringify(cmds.map(c => c.id));
 }
+
+let filteredCmds = [];
 function filterCommands(val) {
   filteredCmds = val ? COMMANDS.filter(c => c.label.toLowerCase().includes(val.toLowerCase())) : [];
   renderCommands(filteredCmds.length ? filteredCmds : COMMANDS);
 }
+
 function runCommand(idx) {
   const cmds = filteredCmds.length > 0 ? filteredCmds : COMMANDS;
   if (cmds[idx]) { cmds[idx].action(); closeCommandPalette(); }
@@ -1309,13 +1361,24 @@ document.addEventListener('DOMContentLoaded', function() {
 function startResize(e) {
   e.preventDefault();
   const sidebar = document.getElementById('sidebar');
-  const startX = e.clientX, startW = sidebar.offsetWidth;
-  function onMove(e) { sidebar.style.width = Math.max(180, Math.min(400, startW + e.clientX - startX)) + 'px'; }
-  function onUp()   { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); }
+  const startX = e.clientX;
+  const startW = sidebar.offsetWidth;
+
+  function onMove(e) {
+    const newW = Math.max(180, Math.min(400, startW + e.clientX - startX));
+    sidebar.style.width = newW + 'px';
+  }
+  function onUp() {
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+  }
   document.addEventListener('mousemove', onMove);
   document.addEventListener('mouseup', onUp);
 }
-function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
 
 // ─────────────────────────────────────────────
 // TOAST
